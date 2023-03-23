@@ -1,14 +1,10 @@
 import dash
 from dash import dcc
 from dash import html
-from dash.dependencies import Input, Output
-
-import pandas as pd
 import plotly.graph_objs as go
-import plotly.express as px
+import pandas as pd
 
-# Dataset Processing
-
+# Load the data
 data = pd.read_csv('World Energy Consumption.csv')
 continents = pd.read_csv('continents2.csv')
 continents = continents[['name', 'alpha-3', 'region', 'sub-region']]
@@ -20,97 +16,91 @@ data['sub_region']=sub_regions
 
 oil_consumption_df=data[data['oil_consumption'].notna()][['oil_consumption', 'year', 'iso_code', 'country', 'region', 'sub_region' ]]
 
+# Filter the data
+world_data = oil_consumption_df[oil_consumption_df['country'] == 'World']
 
+# Create the bar chart trace
+trace_world = go.Bar(
+    x=world_data['year'],
+    y=world_data['oil_consumption'],
+    text=world_data['oil_consumption'],
+    texttemplate='%{y:.2s}',
+    textposition='outside',
+    cliponaxis=False,
+    marker=dict(color='orange'),
+    hovertemplate='<b>Year:</b> %{x}<br><b>Oil Consumption:</b> %{y:.1f}',
+    name=''
+)
 
-# Requirements for the dash core components
+# Create a dataframe with oil consumption by region and year
+oil_consumption_region = oil_consumption_df.loc[oil_consumption_df['region']!='OWID_WRL'].groupby(['region', 'year']).sum()
+oil_consumption_region = oil_consumption_region.reset_index()[['region', 'year', 'oil_consumption']]
 
+# Create an empty graph object
+fig_bar = go.Figure()
+fig_bar2 = go.Figure()
 
-year_slider = dcc.RangeSlider(
-        id='year_slider',
-        min=1990,
-        max=2014,
-        value=[1990, 2014],
-        marks={'1990': 'Year 1990',
-               '1995': 'Year 1995',
-               '2000': 'Year 2000',
-               '2005': 'Year 2005',
-               '2010': 'Year 2010',
-               '2014': 'Year 2014'},
-        step=1
+# Loop through each unique year in the dataset and create a trace for each year
+for year in oil_consumption_region['year'].unique():
+    # Filter the dataframe to only include data for the current year
+    data_for_year = oil_consumption_region[oil_consumption_region['year'] == year]
+    # Create a trace for the current year
+    fig_bar.add_trace(dict(type='bar',
+                     x=data_for_year['region'],
+                     y=data_for_year['oil_consumption'],
+                     showlegend=False,
+                     visible=False,
+                     marker=dict(color='orange'),
+                     hovertemplate='<b>%{x}</b> <br><b>Oil Consumption:</b> %{y:.1f}',
+                     name=''
+                    )
+               )
+
+# First seen trace
+fig_bar.data[0].visible = True
+
+# Create a slider step for each year
+steps = []
+for i, year in enumerate(oil_consumption_region['year'].unique()):
+    visible_traces = [False] * len(oil_consumption_region['year'].unique())
+    visible_traces[i] = True
+    step = dict(
+        label=str(year),
+        method="update",
+        args=[{"visible": visible_traces},
+              {"title": "Oil consumption by continent in " + str(year)}],
     )
+    steps.append(step)
 
-# The app itself
+# Add slider to the layout
+sliders = [dict(
+    active=0,
+    steps=steps
+)]
 
+# Set the layout
+layout = dict(title=dict(text='Oil consumption by continent between 1965 and 2019'),
+              yaxis=dict(title='Oil Consumption (terawatt-hours)',
+                         range=[0,2*(10**4)]
+                        ),
+              sliders=sliders,
+              plot_bgcolor='white'
+            )
+
+# Add the traces to the figure
+fig_bar.update_layout(layout)
+fig_bar2.add_trace(trace_world)
+
+# Create the app
 app = dash.Dash(__name__)
 
+# Define the layout
 app.layout = html.Div([
-
-   
-
+    html.H1(children='Oil Consumption'),
+    dcc.Graph(id='oil_consumption', figure=fig_bar),
     html.Br(),
-
-    dcc.Graph(id='graph_example'),
-
-    html.Br(),
-    year_slider
-
+    dcc.Graph(id='oil_consumption 2 ', figure=fig_bar2),
 ])
-
-
-@app.callback(
-    Output('graph_example', 'figure'),
-    [Input('country_drop', 'value'),
-     Input('gas_radio', 'value'),
-
-     Input('year_slider', 'value')]
-)
-def update_graph(countries, gas, year):
-        
-        
-    # filter the data
-    world_data = oil_consumption_df[oil_consumption_df['country'] == 'World']
-
-    # create the bar chart trace
-    trace = go.Bar(
-        x=world_data['year'],
-        y=world_data['oil_consumption'],
-        text=world_data['oil_consumption'],
-        texttemplate='%{y:.2s}',
-        textposition='outside',
-        cliponaxis=False,
-        marker=dict(color='orange'),
-        hovertemplate='<b>Year:</b> %{x}<br><b>Oil Consumption:</b> %{y:.1f}',
-        name=''
-    )
-
-    # create the layout
-    layout = go.Layout(
-        title='WorldWide Oil Consumption by Year',
-        xaxis=dict(
-            title='Year',
-            tickmode='linear',
-            dtick=1,
-            tickangle=270
-        ),
-        yaxis=dict(
-            title='Oil Consumption (terawatt-hours)'
-        ),
-        plot_bgcolor='white',
-        hoverlabel=dict()
-    )
-
-    # create the figure
-    fig = go.Figure(data=[trace], layout=layout)
-
-    # update the text font size
-    fig.update_traces(textfont_size=12)
-
-
-
-
-
-    return fig
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
