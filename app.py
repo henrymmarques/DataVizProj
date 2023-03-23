@@ -93,6 +93,7 @@ fig_bar2.add_trace(trace_world)
 
 # Create the app
 app = dash.Dash(__name__)
+server = app.server
 
 # Define the layout
 app.layout = html.Div([
