@@ -1,3 +1,9 @@
-dash==2.8.1
-pandas==1.5.2
-plotly==5.11.0
+gunicorn
+plotly
+dash
+requests
+dash_renderer
+dash-html-components
+dash-core-components
+pandas
+numpy
