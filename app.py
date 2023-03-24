@@ -126,13 +126,66 @@ def fig_oil_consu_slider():
 app = dash.Dash(__name__)
 server = app.server
 
-# Define the layout
+# /////////// SEM TABS /////////
+# # Define the layout
+# app.layout = html.Div([
+#     html.H1(children='Oil Consumption'),
+#     dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider()),
+#     html.Br(),
+#     dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot()),
+# ])
+# ///////////////////////////////
+
+
+
+
 app.layout = html.Div([
-    html.H1(children='Oil Consumption'),
-    dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider()),
-    html.Br(),
-    dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot()),
+    html.H1('World Energy Data', style={'textAlign': 'center'}),
+    dcc.Tabs(id="tabs-example-graph", value='tab-1-example-graph', children=[
+        dcc.Tab(label='Tab One', value='tab-1-example-graph'),
+        dcc.Tab(label='Tab Two', value='tab-2-example-graph'),
+    ]),
+    html.Div(id='tabs-content-example-graph')
 ])
+
+@app.callback(dash.dependencies.Output('tabs-content-example-graph', 'children'),
+              dash.dependencies.Input('tabs-example-graph', 'value'))
+def render_content(tab):
+    if tab == 'tab-1-example-graph':
+        return html.Div([
+            html.H3('Tab content 1'),
+            html.H1(children='Oil Consumption'),
+            dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider()),
+            html.Br(),
+            dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot()),
+        ])
+    elif tab == 'tab-2-example-graph':
+        return html.Div([
+            html.H3('Tab content 2'),
+            dcc.Graph(
+                id='graph-2-tabs-dcc',
+                figure={
+                    'data': [{
+                        'x': [1, 2, 3],
+                        'y': [5, 10, 6],
+                        'type': 'bar'
+                    }]
+                }
+            )
+        ])
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
