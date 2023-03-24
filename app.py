@@ -24,77 +24,103 @@ oil_consumption_df=data[data['oil_consumption'].notna()][['oil_consumption', 'ye
 # Filter the data
 world_data = oil_consumption_df[oil_consumption_df['country'] == 'World']
 
-# Create the bar chart trace
-trace_world = go.Bar(
-    x=world_data['year'],
-    y=world_data['oil_consumption'],
-    text=world_data['oil_consumption'],
-    texttemplate='%{y:.2s}',
-    textposition='outside',
-    cliponaxis=False,
-    marker=dict(color='orange'),
-    hovertemplate='<b>Year:</b> %{x}<br><b>Oil Consumption:</b> %{y:.1f}',
-    name=''
-)
 
 # Create a dataframe with oil consumption by region and year
 oil_consumption_region = oil_consumption_df.loc[oil_consumption_df['region']!='OWID_WRL'].groupby(['region', 'year']).sum()
 oil_consumption_region = oil_consumption_region.reset_index()[['region', 'year', 'oil_consumption']]
 
-# Create an empty graph object
-fig_oil_consu_slider = go.Figure()
-fig_oil_consu = go.Figure()
 
-# Loop through each unique year in the dataset and create a trace for each year
-for year in oil_consumption_region['year'].unique():
-    # Filter the dataframe to only include data for the current year
-    data_for_year = oil_consumption_region[oil_consumption_region['year'] == year]
-    # Create a trace for the current year
-    fig_oil_consu_slider.add_trace(dict(type='bar',
-                     x=data_for_year['region'],
-                     y=data_for_year['oil_consumption'],
-                     showlegend=False,
-                     visible=False,
-                     marker=dict(color='orange'),
-                     hovertemplate='<b>%{x}</b> <br><b>Oil Consumption:</b> %{y:.1f}',
-                     name=''
-                    )
-               )
-
-# First seen trace
-fig_oil_consu_slider.data[0].visible = True
-
-# Create a slider step for each year
-steps = []
-for i, year in enumerate(oil_consumption_region['year'].unique()):
-    visible_traces = [False] * len(oil_consumption_region['year'].unique())
-    visible_traces[i] = True
-    step = dict(
-        label=str(year),
-        method="update",
-        args=[{"visible": visible_traces},
-              {"title": "Oil consumption by continent in " + str(year)}],
+##      fig_oil_consu       ##
+def fig_oil_consu_plot():
+    # Create the bar chart trace
+    trace_world = go.Bar(
+        x=world_data['year'],
+        y=world_data['oil_consumption'],
+        text=world_data['oil_consumption'],
+        texttemplate='%{y:.2s}',
+        textposition='outside',
+        cliponaxis=False,
+        marker=dict(color='orange'),
+        hovertemplate='<b>Year:</b> %{x}<br><b>Oil Consumption:</b> %{y:.1f}',
+        name=''
     )
-    steps.append(step)
 
-# Add slider to the layout
-sliders = [dict(
-    active=0,
-    steps=steps
-)]
+    # create the layout
+    layout_world = go.Layout(
+        title='WorldWide Oil Consumption by Year',
+        xaxis=dict(
+            title='Year',
+            tickmode='linear',
+            dtick=1,
+            tickangle=270
+        ),
+        yaxis=dict(
+            title='Oil Consumption (terawatt-hours)'
+        ),
+        plot_bgcolor='white',
+        hoverlabel=dict()
+    )
+    fig_oil_consu = go.Figure(data=trace_world, layout=layout_world)
+    # fig_oil_consu.add_trace(trace_world)
 
-# Set the layout
-layout = dict(title=dict(text='Oil consumption by continent between 1965 and 2019'),
-              yaxis=dict(title='Oil Consumption (terawatt-hours)',
-                         range=[0,2*(10**4)]
-                        ),
-              sliders=sliders,
-              plot_bgcolor='white'
-            )
+    return fig_oil_consu
+########################################################################
 
-# Add the traces to the figure
-fig_oil_consu_slider.update_layout(layout)
-fig_oil_consu.add_trace(trace_world)
+def fig_oil_consu_slider():
+    # Loop through each unique year in the dataset and create a trace for each year
+    for year in oil_consumption_region['year'].unique():
+        # Filter the dataframe to only include data for the current year
+        data_for_year = oil_consumption_region[oil_consumption_region['year'] == year]
+        fig_oil_consu_slider = go.Figure()
+        # Create a trace for the current year
+        fig_oil_consu_slider.add_trace(dict(type='bar',
+                        x=data_for_year['region'],
+                        y=data_for_year['oil_consumption'],
+                        showlegend=False,
+                        visible=False,
+                        marker=dict(color='orange'),
+                        hovertemplate='<b>%{x}</b> <br><b>Oil Consumption:</b> %{y:.1f}',
+                        name=''
+                        )
+                )
+
+    # First seen trace
+    fig_oil_consu_slider.data[0].visible = True
+
+    # Create a slider step for each year
+    steps = []
+    for i, year in enumerate(oil_consumption_region['year'].unique()):
+        visible_traces = [False] * len(oil_consumption_region['year'].unique())
+        visible_traces[i] = True
+        step = dict(
+            label=str(year),
+            method="update",
+            args=[{"visible": visible_traces},
+                {"title": "Oil consumption by continent in " + str(year)}],
+        )
+        steps.append(step)
+
+    # Add slider to the layout
+    sliders = [dict(
+        active=0,
+        steps=steps
+    )]
+
+    # Set the layout
+    layout = dict(title=dict(text='Oil consumption by continent between 1965 and 2019'),
+                yaxis=dict(title='Oil Consumption (terawatt-hours)',
+                            range=[0,2*(10**4)]
+                            ),
+                sliders=sliders,
+                plot_bgcolor='white'
+                )
+    
+
+    # Add the traces to the figure
+    fig_oil_consu_slider.update_layout(layout)
+    return fig_oil_consu_slider
+###########################################################################3
+
 
 # Create the app
 app = dash.Dash(__name__)
@@ -103,9 +129,9 @@ server = app.server
 # Define the layout
 app.layout = html.Div([
     html.H1(children='Oil Consumption'),
-    dcc.Graph(id='oil_consumption', figure=fig_oil_consu_slider),
+    dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider()),
     html.Br(),
-    dcc.Graph(id='oil_consumption 2 ', figure=fig_oil_consu),
+    dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot()),
 ])
 
 if __name__ == '__main__':
