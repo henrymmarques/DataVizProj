@@ -22,8 +22,7 @@ sub_regions = data.iso_code.replace(
 data['sub_region'] = sub_regions
 
 # df for oil_consumption plots
-oil_consumption_df = data[data['oil_consumption'].notna(
-)][['oil_consumption', 'year', 'iso_code', 'country', 'region', 'sub_region']]
+oil_consumption_df = data[data['oil_consumption'].notna()][['oil_consumption', 'year', 'iso_code', 'country', 'region', 'sub_region']]
 
 # Filter the data
 world_data = oil_consumption_df[oil_consumption_df['country'] == 'World']
@@ -35,25 +34,31 @@ oil_consumption_region = oil_consumption_df.loc[oil_consumption_df['region'] != 
 oil_consumption_region = oil_consumption_region.reset_index()[
     ['region', 'year', 'oil_consumption']]
 
+########################################################################
 
-##      fig_oil_consu       ##
-def fig_oil_consu_plot():
+#generic function for every type of energy consumption plot worldwide
+def fig_consu(variable, energy_type, yaxis_title):
+    #create df for variable=variable
+    consumption_df = data[data[variable].notna()][[variable, 'year', 'iso_code', 'country', 'region', 'sub_region']]
+    # Filter the data
+    consumption_df = consumption_df[consumption_df['country'] == 'World']
+
     # Create the bar chart trace
     trace_world = go.Bar(
-        x=world_data['year'],
-        y=world_data['oil_consumption'],
-        text=world_data['oil_consumption'],
+        x=consumption_df['year'],
+        y=consumption_df[variable],
+        text=consumption_df[variable],
         texttemplate='%{y:.2s}',
         textposition='outside',
         cliponaxis=False,
         marker=dict(color='orange'),
-        hovertemplate='<b>Year:</b> %{x}<br><b>Oil Consumption:</b> %{y:.1f}',
+        hovertemplate='<b>Year:</b> %{x}<br><b>' + energy_type + ' Consumption:</b> %{y:.1f}',
         name=''
     )
 
     # create the layout
     layout_world = go.Layout(
-        title='WorldWide Oil Consumption by Year',
+        title=f'WorldWide {energy_type} Consumption by Year',
         xaxis=dict(
             title='Year',
             tickmode='linear',
@@ -61,15 +66,15 @@ def fig_oil_consu_plot():
             tickangle=270
         ),
         yaxis=dict(
-            title='Oil Consumption (terawatt-hours)'
+            title=yaxis_title
         ),
         plot_bgcolor='white',
         hoverlabel=dict()
     )
-    fig_oil_consu = go.Figure(data=trace_world, layout=layout_world)
+    fig_consum = go.Figure(data=trace_world, layout=layout_world)
     # fig_oil_consu.add_trace(trace_world)
 
-    return fig_oil_consu
+    return fig_consum
 ########################################################################
 
 
@@ -125,7 +130,7 @@ def fig_oil_consu_slider():
     # Add the traces to the figure
     fig_oil_consu_slider.update_layout(layout)
     return fig_oil_consu_slider
-# 3
+# 
 
 
 # Create the app
@@ -147,9 +152,9 @@ app.layout = html.Div([
     html.H1('World Energy Data', style={'textAlign': 'center'}),
     dcc.Tabs(id="tabs-example-graph", value='tab-1', children=[
         dcc.Tab(label='Oil', value='tab-1'),
-        dcc.Tab(label='Tab Two', value='tab-2'),
-        dcc.Tab(label='Tab Three', value='tab-3'),
-        dcc.Tab(label='Tab Four', value='tab-4'),
+        dcc.Tab(label='Nuclear', value='tab-2'),
+        dcc.Tab(label='Coal', value='tab-3'),
+        dcc.Tab(label='Gas', value='tab-4'),
     ],
     ),
     html.Div(id='tabs-content-example-graph')
@@ -161,15 +166,18 @@ app.layout = html.Div([
 def render_content(tab):
     if tab == 'tab-1':
         return html.Div([
-            html.H1(children='Oil Consumption'),
+            
             dcc.Graph(id='fig_oil_consu_slider',
                       figure=fig_oil_consu_slider()),
             html.Br(),
-            dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot()),
+            dcc.Graph(id='fig_oil_consu_plot', figure=fig_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
+            html.Br(),
+            
         ])
     elif tab == 'tab-2':
         return html.Div([
-            html.H3('Tab content 2'),
+            html.H1(children='Nuclear Consumption'),
+            dcc.Graph(id='fig_oil_consu_plot', figure=fig_consu('nuclear_consumption', 'Nuclear', 'Nuclear Energy Consumption (terawatt-hours)')),
 
         ])
 
