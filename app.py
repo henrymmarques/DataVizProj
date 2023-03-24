@@ -37,7 +37,7 @@ oil_consumption_region = oil_consumption_region.reset_index()[
 ########################################################################
 
 #generic function for every type of energy consumption plot worldwide
-def fig_consu(variable, energy_type, yaxis_title):
+def fig_world_consu(variable, energy_type, yaxis_title):
     #create df for variable=variable
     consumption_df = data[data[variable].notna()][[variable, 'year', 'iso_code', 'country', 'region', 'sub_region']]
     # Filter the data
@@ -79,12 +79,15 @@ def fig_consu(variable, energy_type, yaxis_title):
 
 
 def fig_oil_consu_slider():
+    # Define the figure object
+    fig_oil_consu_slider = go.Figure()
+
     # Loop through each unique year in the dataset and create a trace for each year
     for year in oil_consumption_region['year'].unique():
         # Filter the dataframe to only include data for the current year
         data_for_year = oil_consumption_region[oil_consumption_region['year'] == year]
-        fig_oil_consu_slider = go.Figure()
-        # Create a trace for the current year
+
+        # Create a trace for the current year and add it to the figure
         fig_oil_consu_slider.add_trace(dict(type='bar',
                                             x=data_for_year['region'],
                                             y=data_for_year['oil_consumption'],
@@ -127,9 +130,11 @@ def fig_oil_consu_slider():
                   plot_bgcolor='white'
                   )
 
-    # Add the traces to the figure
+    # Add the layout to the figure
     fig_oil_consu_slider.update_layout(layout)
+
     return fig_oil_consu_slider
+
 # 
 
 
@@ -170,14 +175,14 @@ def render_content(tab):
             dcc.Graph(id='fig_oil_consu_slider',
                       figure=fig_oil_consu_slider()),
             html.Br(),
-            dcc.Graph(id='fig_oil_consu_plot', figure=fig_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
+            dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
             html.Br(),
             
         ])
     elif tab == 'tab-2':
         return html.Div([
             html.H1(children='Nuclear Consumption'),
-            dcc.Graph(id='fig_oil_consu_plot', figure=fig_consu('nuclear_consumption', 'Nuclear', 'Nuclear Energy Consumption (terawatt-hours)')),
+            dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('nuclear_consumption', 'Nuclear', 'Nuclear Energy Consumption (terawatt-hours)')),
 
         ])
 
