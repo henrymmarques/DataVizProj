@@ -4,14 +4,21 @@ from dash import html
 import plotly.graph_objs as go
 import plotly.express as px
 import pandas as pd
+import requests
+import geopandas as gpd
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Load the data
 data = pd.read_csv(
     'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/World%20Energy%20Consumption.csv')
+
 continents = pd.read_csv(
     'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/country_continent_map.csv')
+
+continent_geolocations = requests.get('https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/continents_geoLocation.json')
+continent_geolocations=gpd.GeoDataFrame.from_features(continent_geolocations.json())
+
 
 # Preprocess the data
 continents = continents[['country', 'iso-3', 'region', 'subregion']]
@@ -33,6 +40,9 @@ oil_consumption_region = oil_consumption_df.loc[oil_consumption_df['region'] != 
                                                                                                     'region', 'year']).sum()
 oil_consumption_region = oil_consumption_region.reset_index()[
     ['region', 'year', 'oil_consumption']]
+#merge geolocation for each continent
+oil_consumption_region = pd.merge(oil_consumption_region, continent_geolocations, left_on='region', right_on='CONTINENT')
+oil_consumption_region.drop(columns=['CONTINENT'], inplace=True)
 
 ########################################################################
 
@@ -136,43 +146,27 @@ def fig_oil_consu_slider():
     return fig_oil_consu_slider
 
 
-def choropleth_by_continent():
+# def choropleth_by_continent():
+    # Convert the DataFrame to a GeoDataFrame
+gdf = gpd.GeoDataFrame(oil_consumption_region[oil_consumption_region['year'].isin([1970, 1980, 1990, 2000, 2010, 2019])], geometry='geometry')
 
 
-    # Load the pre-embedded data
-    df = px.data.gapminder().query("year == 2007")
 
-    # Load your data
-    oil_consumption_region = data
+fig12 = px.choropleth_mapbox(
+    gdf,
+    geojson=gdf.geometry,
+    locations=gdf.index,
+    color="oil_consumption",
+    animation_frame='year',
+    height=600,
+    mapbox_style="carto-positron",
+    color_continuous_scale="solar",
+    opacity=0.5,
+    zoom=1
+).update_layout(margin={"l": 0, "r": 0, "b": 0, "t": 0},
+                coloraxis_colorbar=dict(title="Oil Consumption (terawatt hour)"))
 
-    # Merge the two datasets based on the country ISO code
-    merged_data = pd.merge(df, oil_consumption_region, left_on='iso_alpha', right_on='iso_alpha')
-
-    # Create the choropleth map
-    fig = go.Figure(go.Choroplethmapbox(
-            geojson=merged_data['geometry'],
-            locations=merged_data['iso_alpha'],
-            z=merged_data['oil_consumption'],
-            colorscale='Blues',
-            zmin=0,
-            zmax=20000,
-            marker_opacity=0.7,
-            marker_line_width=0,
-            colorbar=dict(
-                thickness=20,
-                ticklen=3,
-                title='Oil Consumption (terawatt-hours)',
-                titleside='right'
-            )
-        ))
-
-    fig.update_layout(
-        title_text='Oil Consumption by Region (2007)',
-        mapbox_style='carto-positron',
-        mapbox_zoom=1,
-        mapbox_center = {'lat': 30, 'lon': 0},
-    )
-    return fig
+    # return fig
 
 # 
 
@@ -243,7 +237,6 @@ def render_content(tab, oil_subtab, nuclear_subtab):
                 
                 dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
                 html.Br(),
-                # dcc.Graph(id="choropleth_oil", figure=choropleth_by_continent()),
                 
             ])
         elif oil_subtab == 'tab-1.2': #oil by continent
@@ -252,6 +245,7 @@ def render_content(tab, oil_subtab, nuclear_subtab):
                 dcc.Graph(id='fig_oil_consu_slider',
                         figure=fig_oil_consu_slider()),
                 html.Br(),
+                dcc.Graph(id="choropleth_oil", figure=fig12),
             ])
     elif tab == 'tab-2':
         if nuclear_subtab == 'tab-2.1': #nuclear and worldwide
