@@ -11,15 +11,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 data = pd.read_csv(
     'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/World%20Energy%20Consumption.csv')
 continents = pd.read_csv(
-    'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/continents2.csv')
+    'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/country_continent_map.csv')
 
 # Preprocess the data
-continents = continents[['name', 'alpha-3', 'region', 'sub-region']]
-regions = data.iso_code.replace(continents.set_index('alpha-3')['region'])
-data['region'] = regions
+continents = continents[['country', 'iso-3', 'region', 'subregion']]
+regions = data.iso_code.replace(continents.set_index('iso-3')['region'])
+data['region']=regions
 data = data[data['iso_code'].notna()]
-sub_regions = data.iso_code.replace(
-    continents.set_index('alpha-3')['sub-region'])
+sub_regions = data.iso_code.replace(continents.set_index('iso-3')['subregion'])
 data['sub_region'] = sub_regions
 
 # df for oil_consumption plots
