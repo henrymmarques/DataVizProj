@@ -2,6 +2,7 @@ import dash
 from dash import dcc
 from dash import html
 import plotly.graph_objs as go
+import plotly.express as px
 import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -135,6 +136,45 @@ def fig_oil_consu_slider():
 
     return fig_oil_consu_slider
 
+
+def choropleth_by_continent():
+
+
+    # Load the pre-embedded data
+    df = px.data.gapminder().query("year == 2007")
+
+    # Load your data
+    oil_consumption_region = data
+
+    # Merge the two datasets based on the country ISO code
+    merged_data = pd.merge(df, oil_consumption_region, left_on='iso_alpha', right_on='iso_alpha')
+
+    # Create the choropleth map
+    fig = go.Figure(go.Choroplethmapbox(
+            geojson=merged_data['geometry'],
+            locations=merged_data['iso_alpha'],
+            z=merged_data['oil_consumption'],
+            colorscale='Blues',
+            zmin=0,
+            zmax=20000,
+            marker_opacity=0.7,
+            marker_line_width=0,
+            colorbar=dict(
+                thickness=20,
+                ticklen=3,
+                title='Oil Consumption (terawatt-hours)',
+                titleside='right'
+            )
+        ))
+
+    fig.update_layout(
+        title_text='Oil Consumption by Region (2007)',
+        mapbox_style='carto-positron',
+        mapbox_zoom=1,
+        mapbox_center = {'lat': 30, 'lon': 0},
+    )
+    return fig
+
 # 
 
 
@@ -204,6 +244,7 @@ def render_content(tab, oil_subtab, nuclear_subtab):
                 
                 dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
                 html.Br(),
+                # dcc.Graph(id="choropleth_oil", figure=choropleth_by_continent()),
                 
             ])
         elif oil_subtab == 'tab-1.2': #oil by continent
