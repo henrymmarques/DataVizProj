@@ -155,11 +155,38 @@ server = app.server
 
 app.layout = html.Div([
     html.H1('World Energy Data', style={'textAlign': 'center'}),
-    dcc.Tabs(id="tabs-example-graph", value='tab-1', children=[
-        dcc.Tab(label='Oil', value='tab-1'),
-        dcc.Tab(label='Nuclear', value='tab-2'),
-        dcc.Tab(label='Coal', value='tab-3'),
-        dcc.Tab(label='Gas', value='tab-4'),
+    dcc.Tabs(id="energy_tabs", value='tab-1', children=[
+        dcc.Tab(label='Oil', value='tab-1', children=[
+            html.Br(),
+            dcc.Tabs(id='oil-tabs', value='tab-1.1', children=[
+                dcc.Tab(label='Worldwide', value='tab-1.1'),
+                dcc.Tab(label='Continent', value='tab-1.2'),
+                dcc.Tab(label='Country', value='tab-1.3')
+            ])
+        ]),
+        dcc.Tab(label='Nuclear', value='tab-2', children=[html.Br(),
+            dcc.Tabs(id='nuclear-tabs', value='tab-2.1', children=[
+                dcc.Tab(label='Worldwide', value='tab-2.1'),
+                dcc.Tab(label='Continent', value='tab-2.2'),
+                dcc.Tab(label='Country', value='tab-2.3')
+            ])
+        ]),
+        dcc.Tab(label='Coal', value='tab-3', children=[
+    html.Br(),
+            dcc.Tabs(id='coal-tabs', value='tab-3.1', children=[
+                dcc.Tab(label='Worldwide', value='tab-3.1'),
+                dcc.Tab(label='Continent', value='tab-3.2'),
+                dcc.Tab(label='Country', value='tab-3.3')
+            ])
+        ]),
+        dcc.Tab(label='Gas', value='tab-4', children=[
+    html.Br(),
+            dcc.Tabs(id='gas-tabs', value='tab-4.1', children=[
+                dcc.Tab(label='Worldwide', value='tab-4.1'),
+                dcc.Tab(label='Continent', value='tab-4.2'),
+                dcc.Tab(label='Country', value='tab-4.3')
+            ])
+        ]),
     ],
     ),
     html.Div(id='tabs-content-example-graph')
@@ -167,24 +194,32 @@ app.layout = html.Div([
 
 
 @app.callback(dash.dependencies.Output('tabs-content-example-graph', 'children'),
-              dash.dependencies.Input('tabs-example-graph', 'value'))
-def render_content(tab):
+              [dash.dependencies.Input('energy_tabs', 'value'),
+              dash.dependencies.Input('oil-tabs', 'value'),
+              dash.dependencies.Input('nuclear-tabs', 'value')])
+def render_content(tab, oil_subtab, nuclear_subtab):
     if tab == 'tab-1':
-        return html.Div([
-            
-            dcc.Graph(id='fig_oil_consu_slider',
-                      figure=fig_oil_consu_slider()),
-            html.Br(),
-            dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
-            html.Br(),
-            
-        ])
+        if oil_subtab == 'tab-1.1': #Oil worldwide
+            return html.Div([
+                
+                dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
+                html.Br(),
+                
+            ])
+        elif oil_subtab == 'tab-1.2': #oil by continent
+            return html.Div([
+                
+                dcc.Graph(id='fig_oil_consu_slider',
+                        figure=fig_oil_consu_slider()),
+                html.Br(),
+            ])
     elif tab == 'tab-2':
-        return html.Div([
-            html.H1(children='Nuclear Consumption'),
-            dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('nuclear_consumption', 'Nuclear', 'Nuclear Energy Consumption (terawatt-hours)')),
+        if nuclear_subtab == 'tab-2.1': #nuclear and worldwide
+            return html.Div([
+                html.H1(children='Nuclear Consumption'),
+                dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('nuclear_consumption', 'Nuclear', 'Nuclear Energy Consumption (terawatt-hours)')),
 
-        ])
+            ])
 
 
 if __name__ == '__main__':
