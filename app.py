@@ -170,28 +170,33 @@ fig12 = px.choropleth_mapbox(
 
 ##########################################################################
 oil_consumption_countries=oil_consumption_df[oil_consumption_df['country']!='World']
+
 # Returns top 10 countries horizontal bar chart with slider over years
-def top10_oil_consumption():
+def top10_oil_consumption(variable, energy_type, xaxis_title):
+    #create df for variable=variable
+    top_10_df = data[data[variable].notna()][[variable, 'year', 'iso_code', 'country']]
+    top_10_df = top_10_df[top_10_df['country']!='World']
+
     # Define the figure object
     top10_fig = go.Figure()
 
     # Loop through each unique year in the dataset and create a trace for each year
-    for year in oil_consumption_countries['year'].unique():
+    for year in top_10_df['year'].unique():
         # Filter the dataframe to only include data for the current year
-        data_for_year = oil_consumption_countries[oil_consumption_countries['year'] == year]
+        data_for_year = top_10_df[top_10_df['year'] == year]
 
         # Sort the data by oil consumption in descending order and select the top 10 countries
-        top_10_countries = data_for_year.sort_values(by='oil_consumption', ascending=True).tail(10)
+        top_10_countries = data_for_year.sort_values(by=variable, ascending=True).tail(10)
 
         # Create a horizontal bar trace for the top 10 countries for the current year and add it to the figure
         top10_fig.add_trace(dict(type='bar',
-                                            x=top_10_countries['oil_consumption'],
-                                            y=top_10_countries['country'].sort_values(ascending=False),
+                                            x=top_10_countries[variable],
+                                            y=top_10_countries['country'].sort_values(ascending=True),
                                             orientation='h',
                                             showlegend=False,
                                             visible=False,
                                             marker=dict(color='orange'),
-                                            hovertemplate='<b>%{y}</b> <br><b>Oil Consumption:</b> %{x:.1f}',
+                                            hovertemplate='<b>%{y}</b> <br><b>' + energy_type + ' Consumption:</b> %{x:.1f}',
                                             name=''
                                             )
                                        )
@@ -201,14 +206,14 @@ def top10_oil_consumption():
 
     # Create a slider step for each year
     steps = []
-    for i, year in enumerate(oil_consumption_countries['year'].unique()):
-        visible_traces = [False] * len(oil_consumption_countries['year'].unique())
+    for i, year in enumerate(top_10_df['year'].unique()):
+        visible_traces = [False] * len(top_10_df['year'].unique())
         visible_traces[i] = True
         step = dict(
             label=str(year),
             method="update",
             args=[{"visible": visible_traces},
-                  {"title": "Top 10 countries with highest oil consumption in " + str(year)},
+                  {"title": "Top 10 countries with highest " + energy_type +  " consumption in " + str(year)},
                   {"yaxis": {"range": [0, 10]}}], # Set the y-axis range to display only the top 10 countries
         )
         steps.append(step)
@@ -223,7 +228,7 @@ def top10_oil_consumption():
 
     # Set the layout
     layout = dict(title=dict(text='Top 10 countries with highest oil consumption between 1965 and 2019'),
-                  xaxis=dict(title='Oil Consumption (terawatt-hours)'),
+                  xaxis=dict(title=xaxis_title),
                   sliders=sliders,
                   plot_bgcolor='white'
                   )
@@ -313,7 +318,7 @@ def render_content(tab, oil_subtab, nuclear_subtab):
         elif oil_subtab == 'tab-1.3': #oil per country
             return html.Div([
                 dcc.Graph(id='fig_oil_top_10',
-                          figure=top10_oil_consumption()),
+                          figure=top10_oil_consumption('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
                 html.Br(),
             ])
     elif tab == 'tab-2':
