@@ -88,7 +88,7 @@ def fig_world_consu(variable, energy_type, yaxis_title):
 ########################################################################
 
 
-def fig_oil_consu_slider():
+def fig_oil_consu_slider(variable, energy_type, yaxis_title):
     # Define the figure object
     fig_oil_consu_slider = go.Figure()
 
@@ -100,11 +100,11 @@ def fig_oil_consu_slider():
         # Create a trace for the current year and add it to the figure
         fig_oil_consu_slider.add_trace(dict(type='bar',
                                             x=data_for_year['region'],
-                                            y=data_for_year['oil_consumption'],
+                                            y=data_for_year[variable],
                                             showlegend=False,
                                             visible=False,
                                             marker=dict(color='orange'),
-                                            hovertemplate='<b>%{x}</b> <br><b>Oil Consumption:</b> %{y:.1f}',
+                                            hovertemplate='<b>%{x}</b> <br><b>' + energy_type + ' Consumption:</b> %{y:.1f}',
                                             name=''
                                             )
                                        )
@@ -121,7 +121,7 @@ def fig_oil_consu_slider():
             label=str(year),
             method="update",
             args=[{"visible": visible_traces},
-                  {"title": "Oil consumption by continent in " + str(year)}],
+                  {"title": energy_type + " consumption by continent in " + str(year)}],
         )
         steps.append(step)
 
@@ -132,8 +132,8 @@ def fig_oil_consu_slider():
     )]
 
     # Set the layout
-    layout = dict(title=dict(text='Oil consumption by continent between 1965 and 2019'),
-                  yaxis=dict(title='Oil Consumption (terawatt-hours)',
+    layout = dict(title=dict(text=energy_type+ ' consumption by continent between 1965 and 2019'),
+                  yaxis=dict(title=yaxis_title,
                              range=[0, 2*(10**4)]
                              ),
                   sliders=sliders,
@@ -169,7 +169,6 @@ fig12 = px.choropleth_mapbox(
     # return fig
 
 ##########################################################################
-oil_consumption_countries=oil_consumption_df[oil_consumption_df['country']!='World']
 
 # Returns top 10 countries horizontal bar chart with slider over years
 def top10_oil_consumption(variable, energy_type, xaxis_title):
@@ -227,7 +226,7 @@ def top10_oil_consumption(variable, energy_type, xaxis_title):
     )]
 
     # Set the layout
-    layout = dict(title=dict(text='Top 10 countries with highest oil consumption between 1965 and 2019'),
+    layout = dict(title=dict(text='Top 10 countries with highest ' + energy_type + ' consumption in 1965'),
                   xaxis=dict(title=xaxis_title),
                   sliders=sliders,
                   plot_bgcolor='white'
@@ -243,16 +242,6 @@ def top10_oil_consumption(variable, energy_type, xaxis_title):
 app = dash.Dash(__name__)
 server = app.server
 
-# /////////// SEM TABS /////////
-# # Define the layout
-# app.layout = html.Div([
-#     html.H1(children='Oil Consumption'),
-#     dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider()),
-#     html.Br(),
-#     dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot()),
-# ])
-# ///////////////////////////////
-
 
 app.layout = html.Div([
     html.H1('World Energy Data', style={'textAlign': 'center'}),
@@ -265,24 +254,24 @@ app.layout = html.Div([
                 dcc.Tab(label='Country', value='tab-1.3')
             ])
         ]),
-        dcc.Tab(label='Nuclear', value='tab-2', children=[html.Br(),
-            dcc.Tabs(id='nuclear-tabs', value='tab-2.1', children=[
+        dcc.Tab(label='Coal', value='tab-2', children=[
+    html.Br(),
+            dcc.Tabs(id='coal-tabs', value='tab-3.1', children=[
                 dcc.Tab(label='Worldwide', value='tab-2.1'),
                 dcc.Tab(label='Continent', value='tab-2.2'),
                 dcc.Tab(label='Country', value='tab-2.3')
             ])
         ]),
-        dcc.Tab(label='Coal', value='tab-3', children=[
-    html.Br(),
-            dcc.Tabs(id='coal-tabs', value='tab-3.1', children=[
+        dcc.Tab(label='Renewables', value='tab-3', children=[html.Br(),
+            dcc.Tabs(id='renewables-tabs', value='tab-3.1', children=[
                 dcc.Tab(label='Worldwide', value='tab-3.1'),
                 dcc.Tab(label='Continent', value='tab-3.2'),
                 dcc.Tab(label='Country', value='tab-3.3')
             ])
         ]),
-        dcc.Tab(label='Gas', value='tab-4', children=[
+        dcc.Tab(label='Comparison', value='tab-4', children=[
     html.Br(),
-            dcc.Tabs(id='gas-tabs', value='tab-4.1', children=[
+            dcc.Tabs(id='comparison-tabs', value='tab-4.1', children=[
                 dcc.Tab(label='Worldwide', value='tab-4.1'),
                 dcc.Tab(label='Continent', value='tab-4.2'),
                 dcc.Tab(label='Country', value='tab-4.3')
@@ -297,7 +286,7 @@ app.layout = html.Div([
 @app.callback(dash.dependencies.Output('tabs-content-example-graph', 'children'),
               [dash.dependencies.Input('energy_tabs', 'value'),
               dash.dependencies.Input('oil-tabs', 'value'),
-              dash.dependencies.Input('nuclear-tabs', 'value')])
+              dash.dependencies.Input('renewables-tabs', 'value')])
 def render_content(tab, oil_subtab, nuclear_subtab):
     if tab == 'tab-1':
         if oil_subtab == 'tab-1.1': #Oil worldwide
@@ -327,6 +316,20 @@ def render_content(tab, oil_subtab, nuclear_subtab):
                 html.H1(children='Nuclear Consumption'),
                 dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('nuclear_consumption', 'Nuclear', 'Nuclear Energy Consumption (terawatt-hours)')),
 
+            ])
+        elif nuclear_subtab == 'tab-2.2': #nuclear by continent
+            return html.Div([
+                
+                dcc.Graph(id='fig_oil_consu_slider',
+                        figure=fig_oil_consu_slider()),
+                html.Br(),
+                # dcc.Graph(id="choropleth_oil", figure=fig12),
+            ])
+        elif nuclear_subtab == 'tab-2.3': #nuclear per country
+            return html.Div([
+                dcc.Graph(id='fig_oil_top_10',
+                          figure=top10_oil_consumption('nuclear_consumption', 'Nuclear', 'Nuclear Consumption (terawatt-hours)')),
+                html.Br(),
             ])
 
 
