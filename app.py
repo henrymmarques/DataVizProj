@@ -145,7 +145,7 @@ def fig_oil_consu_slider():
 
     return fig_oil_consu_slider
 
-
+######################### BY CONTINENT ##################################
 # def choropleth_by_continent():
     # Convert the DataFrame to a GeoDataFrame
 gdf = gpd.GeoDataFrame(oil_consumption_region[oil_consumption_region['year'].isin([1970, 1980, 1990, 2000, 2010, 2019])], geometry='geometry')
@@ -168,7 +168,70 @@ fig12 = px.choropleth_mapbox(
 
     # return fig
 
-# 
+##########################################################################
+oil_consumption_countries=oil_consumption_df[oil_consumption_df['country']!='World']
+# Returns top 10 countries horizontal bar chart with slider over years
+def top10_oil_consumption():
+    # Define the figure object
+    top10_fig = go.Figure()
+
+    # Loop through each unique year in the dataset and create a trace for each year
+    for year in oil_consumption_countries['year'].unique():
+        # Filter the dataframe to only include data for the current year
+        data_for_year = oil_consumption_countries[oil_consumption_countries['year'] == year]
+
+        # Sort the data by oil consumption in descending order and select the top 10 countries
+        top_10_countries = data_for_year.sort_values(by='oil_consumption', ascending=True).tail(10)
+
+        # Create a horizontal bar trace for the top 10 countries for the current year and add it to the figure
+        top10_fig.add_trace(dict(type='bar',
+                                            x=top_10_countries['oil_consumption'],
+                                            y=top_10_countries['country'].sort_values(ascending=False),
+                                            orientation='h',
+                                            showlegend=False,
+                                            visible=False,
+                                            marker=dict(color='orange'),
+                                            hovertemplate='<b>%{y}</b> <br><b>Oil Consumption:</b> %{x:.1f}',
+                                            name=''
+                                            )
+                                       )
+
+    # First seen trace
+    top10_fig.data[0].visible = True
+
+    # Create a slider step for each year
+    steps = []
+    for i, year in enumerate(oil_consumption_countries['year'].unique()):
+        visible_traces = [False] * len(oil_consumption_countries['year'].unique())
+        visible_traces[i] = True
+        step = dict(
+            label=str(year),
+            method="update",
+            args=[{"visible": visible_traces},
+                  {"title": "Top 10 countries with highest oil consumption in " + str(year)},
+                  {"yaxis": {"range": [0, 10]}}], # Set the y-axis range to display only the top 10 countries
+        )
+        steps.append(step)
+
+    # Add slider to the layout
+    sliders = [dict(
+        active=0,
+        steps=steps,
+        currentvalue={"prefix": "Year: ", "font": {"size": 16}},
+        len=1.0
+    )]
+
+    # Set the layout
+    layout = dict(title=dict(text='Top 10 countries with highest oil consumption between 1965 and 2019'),
+                  xaxis=dict(title='Oil Consumption (terawatt-hours)'),
+                  sliders=sliders,
+                  plot_bgcolor='white'
+                  )
+
+    # Add the layout to the figure
+    top10_fig.update_layout(layout)
+
+    return top10_fig
 
 
 # Create the app
@@ -246,6 +309,12 @@ def render_content(tab, oil_subtab, nuclear_subtab):
                         figure=fig_oil_consu_slider()),
                 html.Br(),
                 # dcc.Graph(id="choropleth_oil", figure=fig12),
+            ])
+        elif oil_subtab == 'tab-1.3': #oil per country
+            return html.Div([
+                dcc.Graph(id='fig_oil_top_10',
+                          figure=top10_oil_consumption()),
+                html.Br(),
             ])
     elif tab == 'tab-2':
         if nuclear_subtab == 'tab-2.1': #nuclear and worldwide
