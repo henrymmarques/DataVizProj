@@ -245,7 +245,7 @@ def render_content(tab, oil_subtab, nuclear_subtab):
                 dcc.Graph(id='fig_oil_consu_slider',
                         figure=fig_oil_consu_slider()),
                 html.Br(),
-                dcc.Graph(id="choropleth_oil", figure=fig12),
+                # dcc.Graph(id="choropleth_oil", figure=fig12),
             ])
     elif tab == 'tab-2':
         if nuclear_subtab == 'tab-2.1': #nuclear and worldwide
