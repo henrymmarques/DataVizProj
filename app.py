@@ -281,19 +281,18 @@ app.layout = html.Div([
             html.Br()
         ]),
         dcc.Tab(label='Coal', value='tab-2', children=[
-            # dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
-            # html.Br(),
-            # dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1,tooltip={'always_visible': True, 'placement': 'top'}),
-            # html.Br(),
-            # html.Br(),
-            # dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
-            # html.Br(),
-            # dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
+            dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
+            html.Br(),
+            dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1,tooltip={'always_visible': True, 'placement': 'top'}),
+            html.Br(),
+            html.Br(),
+            dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
+            html.Br(),
+            dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
 
-            # html.Br(),
-            # dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
-            # html.Br()
-            html.Div('hello')
+            html.Br(),
+            dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
+            html.Br()
         ]),
 
         dcc.Tab(label='Renewables', value='tab-3'),
@@ -308,27 +307,33 @@ app.layout = html.Div([
     dash.dependencies.Output('fig_oil_consu_slider', 'figure'),
     dash.dependencies.Output('fig_oil_top_10', 'figure'),
     dash.dependencies.Output('fig_oil_choropleth', 'figure'),
-    # dash.dependencies.Output('fig_coal_consu_plot', 'figure'),
-    # dash.dependencies.Output('fig_coal_consu_slider', 'figure'),
-    # dash.dependencies.Output('fig_coal_top_10', 'figure'),
-    # dash.dependencies.Output('fig_coal_choropleth', 'figure')
+    dash.dependencies.Output('fig_coal_consu_plot', 'figure'),
+    dash.dependencies.Output('fig_coal_consu_slider', 'figure'),
+    dash.dependencies.Output('fig_coal_top_10', 'figure'),
+    dash.dependencies.Output('fig_coal_choropleth', 'figure'),
 ],
 [
     dash.dependencies.Input('energy_tabs', 'value'),
     dash.dependencies.Input('year-slider', 'value'),
-    # dash.dependencies.Input('year-slider2', 'value')
+    dash.dependencies.Input('year-slider2', 'value'),
 ])
-def render_content(tab, year):
+def render_content(tab, year, year2):
+    empty_fig = go.Figure()
+    empty_fig.update_layout(height=500, margin={'l': 40, 'b': 40, 'r': 40, 't': 10})
+
     if tab == 'tab-1':
         fig1 = fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', year)
         fig2 = fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', year)
         fig3 = fig_top10_graph('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', year)
         fig4 = create_choropleth_map('oil_consumption', 'Oil', year)
-        print(fig1)
-        return fig1, fig2, fig3, fig4
+        return fig1, fig2, fig3, fig4, empty_fig, empty_fig, empty_fig, empty_fig
     elif tab == 'tab-2':
         # return default values for coal-related figures
-        return None, None, None, None
+        fig1 = fig_world_consu('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
+        fig2 = fig_consu_slider('coal_consumption', 'Oil', 'Coal Consumption (terawatt-hours)', year2)
+        fig3 = fig_top10_graph('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
+        fig4 = create_choropleth_map('coal_consumption', 'Coal', year2)
+        return empty_fig, empty_fig, empty_fig, empty_fig, fig1, fig2, fig3, fig4
     elif tab == 'tab-3':
         # implement callback for renewables tab
         pass
