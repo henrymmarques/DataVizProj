@@ -262,23 +262,25 @@ fig_coal_choropleth = create_choropleth_map('coal_consumption', 'Oil', 1965)
 app = dash.Dash(__name__)
 server = app.server
 
-
+import dash_bootstrap_components as dbc
 app.layout = html.Div([
     html.H1('World Energy Data', style={'textAlign': 'center'}),
     dcc.Tabs(id="energy_tabs", value='tab-1', children=[
         dcc.Tab(label='Oil', value='tab-1', children=[
-            dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot),
-            html.Br(),
-            dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1,tooltip={'always_visible': True, 'placement': 'top'}),
-            html.Br(),
-            html.Br(),
-            dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider),
-            html.Br(),
-            dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10),
-
-            html.Br(),
-            dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth),
-            html.Br()
+            dbc.Row([
+    dbc.Col([
+        dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10),
+        html.Br(),
+        dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth)
+    ], width=6),
+    dbc.Col([
+        dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot),
+        html.Br(),
+        dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1,tooltip={'always_visible': True, 'placement': 'top'}),
+        html.Br(),
+        dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider)
+    ], width=6)
+])
         ]),
         dcc.Tab(label='Coal', value='tab-2', children=[
             dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
