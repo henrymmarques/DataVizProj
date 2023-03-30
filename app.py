@@ -250,6 +250,42 @@ def top10_consumption(variable, energy_type, xaxis_title):
 
     return top10_fig
 
+def update_top10_graph(year):
+    top10_fig = go.Figure()
+    # Create df for variable=variable
+    top_10_df = data[data['oil_consumption'].notna()][['oil_consumption', 'year', 'iso_code', 'country']]
+    top_10_df = top_10_df[top_10_df['country']!='World']
+
+    # Filter the dataframe to only include data for the selected year
+    data_for_year = top_10_df[top_10_df['year'] == year]
+
+    # Sort the data by oil consumption in descending order and select the top 10 countries
+    top_10_countries = data_for_year.sort_values(by='oil_consumption', ascending=True).tail(10)
+
+    # Remove any existing traces from the figure
+    top10_fig.data = []
+
+    # Create a horizontal bar trace for the top 10 countries for the selected year and add it to the figure
+    top10_fig.add_trace(dict(
+        type='bar',
+        x=top_10_countries['oil_consumption'],
+        y=top_10_countries.sort_values(by='oil_consumption', ascending=True)['country'],
+        orientation='h',
+        showlegend=False,
+        marker=dict(color='orange'),
+        hovertemplate='<b>%{y}</b> <br><b>Oil Consumption:</b> %{x:.1f}',
+        name=''
+    ))
+
+    # Set the layout
+    top10_fig.update_layout(
+        title=dict(text='Top 10 countries with highest Oil consumption in ' + str(year)),
+        xaxis=dict(title='Oil Consumption'),
+        plot_bgcolor='white'
+    )
+
+    return top10_fig
+
 
 # Creates choropleth by country with a slider by year. Some energy consumption
 def create_choropleth_map(variable, energy_type):
@@ -320,6 +356,13 @@ def create_choropleth_map(variable, energy_type):
 
     return fig
 
+################### COMPONENTS #######################
+# Define the slider marks for every 10 years
+slider_marks = {str(year): {'label': str(year), 'style': {'writing-mode': 'vertical-lr', 'text-orientation': 'mixed'}} for year in range(1965, 2020, 10)}
+
+
+
+######################################################
 
 # Create the app
 app = dash.Dash(__name__)
@@ -330,6 +373,8 @@ app.layout = html.Div([
     html.H1('World Energy Data', style={'textAlign': 'center'}),
     dcc.Tabs(id="energy_tabs", value='tab-1', children=[
         dcc.Tab(label='Oil', value='tab-1', children=[
+            html.Br(),
+            dcc.Slider(id='year-slider', min=data['year'].min(), max=data['year'].max(), value=data['year'].min(), marks=slider_marks, step=None),
             html.Br(),
             dcc.Tabs(id='oil-tabs', value='tab-1.1', children=[
                 dcc.Tab(label='Summary', value='tab-1.1'),
@@ -363,21 +408,20 @@ app.layout = html.Div([
 @app.callback(dash.dependencies.Output('tabs-content-example-graph', 'children'),
               [dash.dependencies.Input('energy_tabs', 'value'),
               dash.dependencies.Input('oil-tabs', 'value'),
-              dash.dependencies.Input('renewables-tabs', 'value')])
-def render_content(tab, oil_subtab, nuclear_subtab):
+              dash.dependencies.Input('renewables-tabs', 'value'),
+              dash.dependencies.Input('year-slider', 'value')])
+def render_content(tab, oil_subtab, nuclear_subtab, year):
     if tab == 'tab-1':
         if oil_subtab == 'tab-1.1': #Oil worldwide
             return html.Div([
-                
                 dcc.Graph(id='fig_oil_consu_plot', figure=fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
                 html.Br(),
                  dcc.Graph(id='fig_oil_consu_slider',
                         figure=fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
                 html.Br(),
-                dcc.Graph(id='fig_oil_top_10',
-                          figure=top10_consumption('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
+                dcc.Graph(id='fig_oil_top_10', figure=update_top10_graph(year)),
+                dcc.Graph(id='fig_oil_top_10', figure=top10_consumption('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)')),
                 html.Br(),
-                
                 dcc.Graph(id='fig_oil_choropleth',
                           figure=create_choropleth_map('oil_consumption', 'Oil')),
                 html.Br(),
