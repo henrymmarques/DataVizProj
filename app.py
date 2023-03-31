@@ -230,7 +230,8 @@ def create_choropleth_map(variable, energy_type, year):
         landcolor="white",
         countrycolor="lightgray",
         coastlinecolor="lightgray",
-        oceancolor="lightblue"
+        oceancolor="lightblue",
+        showocean=True
     )
 
     # Update the layout of the map
@@ -288,19 +289,20 @@ app.layout = html.Div([
             ], style={"width": "100%"})
         ]),
         dcc.Tab(label='Coal', value='tab-2', children=[
-            html.Div([
+           html.Div([
                 html.Div([
-                    dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
-                    dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}),
-                    dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
-                ], className="row", style={"display": "flex", "background-color": "#283142", "padding": "10px"}),
+                    dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10, style={'height': '400px'}),
+                
+                    dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth, style={'height': '350px'}),
+                ], className="row", style={"display": "flex", "background-color": "#283142"}),
                 html.Div([
-                    dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
-                ], className="row", style={"display": "flex", "background-color": "#283142", "padding": "10px"}),
+                    dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
+                ], className="row", style={"width":"100%", "background-color": "#283142"}),
                 html.Div([
-                    dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
-                ], className="row", style={"display": "flex", "background-color": "#283142", "padding": "10px"})
-            ])
+                    dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot, style={'height': '400px'}),
+                    dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider, style={'height': '400px'}),
+                ], className="row", style={"display": "flex", "background-color": "#283142"})
+            ], style={"width": "100%"})
         ]),
         dcc.Tab(label='Renewables', value='tab-3'),
         dcc.Tab(label='Comparison', value='tab-4')
