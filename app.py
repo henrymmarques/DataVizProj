@@ -250,9 +250,66 @@ def create_choropleth_map(variable, energy_type, year):
 
     return fig
 
+#Creates stacked bar chart for renewables
+def stacked_renewables():
+    energy_columns = ['other_renewable_consumption', 'solar_consumption', 'wind_consumption', 'hydro_consumption', 'biofuel_consumption']
+    renewables = data[['country', 'region', 'year'] + energy_columns]
+    renewables_2018 = renewables[renewables['year'] == 2018][['region'] + energy_columns]
+    renewables_2018= renewables_2018[renewables_2018['region'].isin(['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'])]
+    # Calculate the total consumption for each region
+    renewables_2018_totals = renewables_2018.groupby('region').sum()
+    # Calculate the percentage of each energy source for each region
+    df_2018_perc = renewables_2018_totals.apply(lambda x: x / x.sum() * 100, axis=1)
+        
+    #  Set colors for the different types of energy
+    colors = {'other_renewable_consumption': '#0066CC',
+            'solar_consumption': '#FFD700',
+            'wind_consumption': '#92C6FF',
+            'hydro_consumption': '#003366',
+            'biofuel_consumption': '#008000'}
+
+    # Create the stacked bar chart
+    fig = go.Figure(data=[go.Bar(
+        x=df_2018_perc.index,
+        y=df_2018_perc[col],
+        name=col.split('_')[0].capitalize(),
+        marker_color=colors[col],
+        hovertemplate="<b>%{y:.2f}%</b> " + col.split('_')[0].capitalize() +" Consumption <extra></extra>"
+    ) for col in df_2018_perc.columns])
+
+    # Update the layout
+    fig.update_layout(
+        barmode='stack',
+        title='Renewable Energy Consumption by Region in 2018',
+        xaxis_title='Region',
+        yaxis_title='Renewable Energy Consumption (%)',
+        hovermode='closest',
+        hoverlabel=dict(bgcolor="white", font_size=16),
+        legend=dict(
+            title='Energy Type',
+            font=dict(size=14),
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        margin=dict(l=50, r=50, t=100, b=50),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=12, color='white'), ##all font
+    )
+
+    return fig
+
+
+
+
+
 ################### COMPONENTS #######################
 # Define the slider marks for every 10 years
-slider_marks = {str(year): {'label': str(year), 'style': {'writing-mode': 'vertical-lr', 'text-orientation': 'mixed'}} for year in range(1965, 2020, 5)}
+slider_marks = {str(year): {'label': str(year), 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}} for year in range(1965, 2020, 5)}
+slider_marks['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}}
 # Create initial plots for 1965
 fig_oil_consu_plot = fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_oil_consu_slider = fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
@@ -304,7 +361,22 @@ app.layout = html.Div([
                 ], className="row", style={"display": "flex", "background-color": "#283142"})
             ], style={"width": "100%"})
         ]),
-        dcc.Tab(label='Renewables', value='tab-3'),
+        dcc.Tab(label='Renewables', value='tab-3', children=[
+           html.Div([
+                html.Div([
+                    dcc.Graph(id='fig_stacked_renew', figure=stacked_renewables(), style={'height': '400px'}),
+                
+                    # dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth, style={'height': '350px'}),
+                ], className="row", style={"display": "flex", "background-color": "#283142"}),
+                # html.Div([
+                #     dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
+                # ], className="row", style={"width":"100%", "background-color": "#283142"}),
+                # html.Div([
+                #     dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot, style={'height': '400px'}),
+                #     dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider, style={'height': '400px'}),
+                # ], className="row", style={"display": "flex", "background-color": "#283142"})
+            ], style={"width": "100%"})
+        ]),
         dcc.Tab(label='Comparison', value='tab-4')
     ]),
     html.Div(id='tabs-content-example-graph')
