@@ -81,7 +81,9 @@ def fig_world_consu(variable, energy_type, yaxis_title, selected_year):
         yaxis=dict(
             title=yaxis_title
         ),
-        plot_bgcolor='white',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'), ##all font
         hoverlabel=dict()
     )
     fig_consum = go.Figure(data=trace_world, layout=layout_world)
@@ -120,7 +122,9 @@ def fig_consu_slider(variable, energy_type, yaxis_title, year):
                   yaxis=dict(title=yaxis_title,
                              range=[0, 2*(10**4)]
                              ),
-                  plot_bgcolor='white'
+                     plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white') ##all font
                   )
 
     # Add the layout to the figure
@@ -186,7 +190,9 @@ def fig_top10_graph(variable, energy_type, xaxis_title, year):
     top10_fig.update_layout(
         title=dict(text='Top 10 countries with highest ' + energy_type +' consumption in ' + str(year)),
         xaxis=dict(title=xaxis_title),
-        plot_bgcolor='white'
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white') ##all font
     )
 
     return top10_fig
@@ -212,7 +218,7 @@ def create_choropleth_map(variable, energy_type, year):
         marker_line_color="white",
         text=oil_data_year["country"],
         hovertemplate="<b>%{text}</b><br>" + energy_type + " Consumption: %{z:.2f}",
-        name=''
+        name='',
     ))
 
     # Load high resolution world map
@@ -231,11 +237,11 @@ def create_choropleth_map(variable, energy_type, year):
     fig.update_layout(
         title= energy_type + " Consumption per Country in {}".format(year),
         geo_scope="world",
-        margin={"l": 0, "r": 0, "t": 50, "b": 0},
+        margin={"l": 0, "r": 30, "t": 50, "b": 0},
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(size=16, color='black'), ##all font
-        height=800
+        font=dict(size=12, color='white'), ##all font
+        # height=800
     )
     
     # Update the title with the current year
@@ -262,47 +268,47 @@ fig_coal_choropleth = create_choropleth_map('coal_consumption', 'Oil', 1965)
 app = dash.Dash(__name__)
 server = app.server
 
-import dash_bootstrap_components as dbc
 app.layout = html.Div([
     html.H1('World Energy Data', style={'textAlign': 'center'}),
     dcc.Tabs(id="energy_tabs", value='tab-1', children=[
         dcc.Tab(label='Oil', value='tab-1', children=[
-            dbc.Row([
-    dbc.Col([
-        dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10),
-        html.Br(),
-        dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth)
-    ], width=6),
-    dbc.Col([
-        dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot),
-        html.Br(),
-        dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1,tooltip={'always_visible': True, 'placement': 'top'}),
-        html.Br(),
-        dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider)
-    ], width=6)
-])
+            html.Div([
+                html.Div([
+                    dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10, style={'height': '400px'}),
+                
+                    dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth, style={'height': '350px'}),
+                ], className="row", style={"display": "flex", "background-color": "#283142"}),
+                html.Div([
+                    dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
+                ], className="row", style={"width":"100%", "background-color": "#283142"}),
+                html.Div([
+                    dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot, style={'height': '400px'}),
+                    dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider, style={'height': '400px'}),
+                ], className="row", style={"display": "flex", "background-color": "#283142"})
+            ], style={"width": "100%"})
         ]),
         dcc.Tab(label='Coal', value='tab-2', children=[
-            dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
-            html.Br(),
-            dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1,tooltip={'always_visible': True, 'placement': 'top'}),
-            html.Br(),
-            html.Br(),
-            dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
-            html.Br(),
-            dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
-
-            html.Br(),
-            dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
-            html.Br()
+            html.Div([
+                html.Div([
+                    dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
+                    dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}),
+                    dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
+                ], className="row", style={"display": "flex", "background-color": "#283142", "padding": "10px"}),
+                html.Div([
+                    dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
+                ], className="row", style={"display": "flex", "background-color": "#283142", "padding": "10px"}),
+                html.Div([
+                    dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
+                ], className="row", style={"display": "flex", "background-color": "#283142", "padding": "10px"})
+            ])
         ]),
-
         dcc.Tab(label='Renewables', value='tab-3'),
         dcc.Tab(label='Comparison', value='tab-4')
-        ]
-    ),
+    ]),
     html.Div(id='tabs-content-example-graph')
 ])
+
+
 
 @app.callback([
     dash.dependencies.Output('fig_oil_consu_plot', 'figure'),
