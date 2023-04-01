@@ -75,7 +75,7 @@ def fig_world_consu(variable, energy_type, yaxis_title, selected_year):
         xaxis=dict(
             title='Year',
             tickmode='linear',
-            dtick=1,
+            dtick=5,
             tickangle=270
         ),
         yaxis=dict(
@@ -366,6 +366,35 @@ app.layout = html.Div([
         dcc.Tab(label='Renewables', value='tab-3', children=[
            html.Div([
                 html.Div([
+    
+                    dcc.Dropdown(id='energy_dropdown', options=[
+                                                    {
+                                                        'label': html.Span(['Hydro'], style={'background-color': '#003366', 'font-size': 20}),
+                                                        'value':'hydro_consumption'
+                                                    },
+                                                    {'label': html.Span(['Solar'], style={'background-color': '#FFD700', 'font-size': 20}),
+                                                        'value':'solar_consumption'
+                                                     },
+                                                     {'label': html.Span(['Biofuel'], style={'background-color': '#008000', 'font-size': 20}),
+                                                        'value':'biofuel_consumption'
+                                                     },
+                                                     {'label': html.Span(['Wind'], style={'background-color': '#92C6FF', 'font-size': 20}),
+                                                        'value':'wind_consumption'
+                                                     },
+                                                     {'label': html.Span(['Other Renewables'], style={'background-color': '#0066CC', 'font-size': 20}),
+                                                        'value':'other_renewable_consumption'
+                                                     },
+
+                                                ]
+                                    , value=['Hydro']
+                                    , multi=True
+                                    , style={'backgroundColor': '#283142', 'font-size': 20, 'color':'white'}
+                                    , clearable=False
+                                    , placeholder="Select energy types"),
+
+
+                ], className="row", style={"width":"50%"}),
+                html.Div([
                     dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked, style={'height': '400px'}),
                     # dcc.Graph(id='fig_ren_top_10', figure=fig_coal_top_10, style={'height': '400px'}),
 
@@ -420,7 +449,7 @@ def render_content(tab, year):
 ],
 [
     dash.dependencies.Input('energy_tabs', 'value'),
-    dash.dependencies.Input('year-slider3', 'value'),
+    dash.dependencies.Input('year-slider2', 'value'),
 ])
 def render_content(tab, year2):
     empty_fig = go.Figure()
@@ -447,7 +476,7 @@ def render_content(tab, year2):
 ],
 [
     dash.dependencies.Input('energy_tabs', 'value'),
-    dash.dependencies.Input('year-slider2', 'value'),
+    dash.dependencies.Input('year-slider3', 'value'),
 ])
 def render_content(tab, year2):
     empty_fig = go.Figure()
@@ -463,33 +492,7 @@ def render_content(tab, year2):
         return  fig1, fig4
     else:
         return empty_fig, empty_fig
-    
-# # Callback renewables tab
-# @app.callback([
-#     dash.dependencies.Output('fig_ren_consu_plot', 'figure'),
-#     # dash.dependencies.Output('fig_coal_consu_slider', 'figure'),
-#     # dash.dependencies.Output('fig_coal_top_10', 'figure'),
-#     # dash.dependencies.Output('fig_coal_choropleth', 'figure'),
-# ],
-# [
-#     dash.dependencies.Input('energy_tabs', 'value'),
-#     dash.dependencies.Input('year-slider3', 'value'),
-# ])
-# def render_content(tab, year):
-#     empty_fig = go.Figure()
-#     empty_fig.update_layout(height=500, margin={'l': 40, 'b': 40, 'r': 40, 't': 10})
-
-    
-#     if tab == 'tab-3':
-#         # return default values for coal-related figures
-#         fig1 = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', year)
-#         # fig2 = fig_consu_slider('coal_consumption', 'Oil', 'Coal Consumption (terawatt-hours)', year2)
-#         # fig3 = fig_top10_graph('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
-#         # fig4 = create_choropleth_map('coal_consumption', 'Coal', year2)
-#         return  fig1, empty_fig, empty_fig, empty_fig
-#     else:
-#         return empty_fig, empty_fig, empty_fig, empty_fig
-
+ 
 
 
 if __name__ == '__main__':
