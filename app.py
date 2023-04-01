@@ -251,8 +251,10 @@ def create_choropleth_map(variable, energy_type, year):
     return fig
 
 #Creates stacked bar chart for renewables
-def stacked_renewables(year):
+def stacked_renewables(year, energies=None):
     energy_columns = ['other_renewable_consumption', 'solar_consumption', 'wind_consumption', 'hydro_consumption', 'biofuel_consumption']
+    if energies==None:
+        energies=energy_columns
     renewables = data[['country', 'region', 'year'] + energy_columns]
     renewables_year = renewables[renewables['year'] == year][['region'] + energy_columns]
     renewables_year = renewables_year[renewables_year['region'].isin(['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'])]
@@ -260,6 +262,10 @@ def stacked_renewables(year):
     renewables_year_totals = renewables_year.groupby('region').sum()
     # Calculate the percentage of each energy source for each region
     df_perc = renewables_year_totals.apply(lambda x: x / x.sum() * 100, axis=1)
+    # format input to match variable names
+    # energies= [(x+'_consumption').lower() if ' ' not in x else (x.replace(' ', '_') + '_consumption').lower() for x in energies]
+    # Filter by energies list
+    df_perc = df_perc[energies]
         
     #  Set colors for the different types of energy
     colors = {'other_renewable_consumption': '#0066CC',
@@ -286,6 +292,8 @@ def stacked_renewables(year):
         hovermode='closest',
         hoverlabel=dict(bgcolor="white", font_size=16),
         legend=dict(
+            traceorder='normal',
+            itemclick=False,
             title='Energy Type',
             font=dict(size=14),
             orientation='h',
@@ -386,7 +394,7 @@ app.layout = html.Div([
                                                      },
 
                                                 ]
-                                    , value=['Hydro']
+                                    
                                     , multi=True
                                     , style={'backgroundColor': '#283142', 'font-size': 20, 'color':'white'}
                                     , clearable=False
@@ -477,8 +485,9 @@ def render_content(tab, year2):
 [
     dash.dependencies.Input('energy_tabs', 'value'),
     dash.dependencies.Input('year-slider3', 'value'),
+    dash.dependencies.Input('energy_dropdown', 'value'),
 ])
-def render_content(tab, year2):
+def render_content(tab, year2, energy):
     empty_fig = go.Figure()
     empty_fig.update_layout(height=400, margin={'l': 0, 'b': 0, 'r': 0, 't': 0})
 
@@ -488,7 +497,12 @@ def render_content(tab, year2):
         fig1 = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', year2)
         fig2 = fig_consu_slider('coal_consumption', 'Oil', 'Coal Consumption (terawatt-hours)', year2)
         fig3 = fig_top10_graph('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
-        fig4 = stacked_renewables(year2)
+
+        if energy!=None:
+            if len(energy)==0:
+                energy=None
+        fig4 = stacked_renewables(year2, energy)
+        print(energy)
         return  fig1, fig4
     else:
         return empty_fig, empty_fig
