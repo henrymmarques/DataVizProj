@@ -310,6 +310,75 @@ def stacked_renewables(year, energies=None):
 
     return fig
 
+#Creates top 10 renewables consumption per country and with stacked bars - it is possible to select some variables
+def top_10_renewables(year, energies=None):
+    energy_columns = ['other_renewable_consumption', 'solar_consumption', 'wind_consumption', 'hydro_consumption', 'biofuel_consumption']
+    if energies==None:
+        energies=energy_columns
+    renewables = data[['country', 'region', 'year'] + energy_columns]
+    renewables = renewables[renewables['country']!='World']
+    renewables_year = renewables[renewables['year'] == year][['country'] + energy_columns]
+    # Calculate the total consumption for each country
+    renewables_year_totals = renewables_year.groupby('country').sum()
+    # Filter by energies list
+    renewables_year_totals = renewables_year_totals[energies]
+    # Sort values in descending order
+    renewables_year_totals = renewables_year_totals.loc[renewables_year_totals[energies].sum(axis=1).sort_values(ascending=False).index, energies]
+
+    # Get top 10 countries
+    top_10_df = renewables_year_totals.iloc[:10,:]
+    # Reverse the order of the data frame so that the largest bar appears on top
+    top_10_df = top_10_df.iloc[::-1]
+   
+    # Set colors for the different types of energy
+    colors = {'other_renewable_consumption': '#0066CC',
+            'solar_consumption': '#FFD700',
+            'wind_consumption': '#92C6FF',
+            'hydro_consumption': '#003366',
+            'biofuel_consumption': '#008000'}
+
+    # Create the horizontal bar chart
+    fig = go.Figure(data=[go.Bar(
+        y=top_10_df.index,
+        x=top_10_df[col],
+        name=col.split('_')[0].capitalize(),
+        marker_color=colors[col],
+        orientation='h',
+        customdata=[[top_10_df.loc[country].sum()] * len(top_10_df.columns) for country in top_10_df.index],
+        hovertemplate="<b>Total Renewables Consumption:</b> %{customdata[0]:.2f} TWh<br>" +
+                    #   "<b>%{x:.2f} TWh</b> " + col.split('_')[0].capitalize() +" Consumption in %{y}<extra></extra>"
+                      "<b>" + col.split('_')[0].capitalize() + " Consumption: </b>" + "%{x:.2f} TWh<extra></extra>"
+    ) for col in top_10_df.columns])
+
+    # Update the layout
+    fig.update_layout(
+        barmode='stack',
+        title='Top 10 Countries for Renewable Energy Consumption in {}'.format(year),
+        xaxis_title='Renewables Energy Consumption (terawatt-hours)',
+        yaxis_title='Country',
+        hovermode='closest',
+        hoverlabel=dict(font_size=12),
+        legend=dict(
+            traceorder='normal',
+            itemclick=False,
+            title='Energy Type',
+            font=dict(size=14),
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        margin=dict(l=200, r=50, t=100, b=50),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=12, color='white'),
+    )
+
+    return fig
+
+
+
 
 
 
@@ -323,12 +392,15 @@ fig_oil_consu_plot = fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption 
 fig_oil_consu_slider = fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_oil_top_10 = fig_top10_graph('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_oil_choropleth = create_choropleth_map('oil_consumption', 'Oil', 1965)
+
 fig_coal_consu_plot = fig_world_consu('coal_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_coal_consu_slider = fig_consu_slider('coal_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_coal_top_10 = fig_top10_graph('coal_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_coal_choropleth = create_choropleth_map('coal_consumption', 'Oil', 1965)
+
 fig_ren_consu_plot = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', 1965)
 fig_ren_stacked = stacked_renewables(1965)
+fig_ren_top_10 = top_10_renewables(1965)
 
 ######################################################
 
@@ -404,7 +476,6 @@ app.layout = html.Div([
                 ], className="row", style={"width":"50%"}),
                 html.Div([
                     dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked, style={'height': '400px'}),
-                    # dcc.Graph(id='fig_ren_top_10', figure=fig_coal_top_10, style={'height': '400px'}),
 
                     dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot, style={'height': '400px'}),
                     # dcc.Graph(id='fig_ren_choropleth', figure=fig_coal_choropleth, style={'height': '350px'}),
@@ -412,10 +483,10 @@ app.layout = html.Div([
                 html.Div([
                     dcc.Slider(id='year-slider3', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
                 ], className="row", style={"width":"100%", "background-color": "#283142"}),
-                # html.Div([
-                #     dcc.Graph(id='fig_ren_consu_plot1', figure=fig_coal_consu_plot, style={'height': '400px'}),
-                #     dcc.Graph(id='fig_ren_consu_slider', figure=fig_coal_consu_slider, style={'height': '400px'}),
-                # ], className="row", style={"display": "flex", "background-color": "#283142"})
+                html.Div([
+                    dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10, style={'height': '400px'}),
+
+                ], className="row", style={"display": "flex", "background-color": "#283142"})
             ], style={"width": "100%"})
         ]),
         dcc.Tab(label='Comparison', value='tab-4')
@@ -478,8 +549,7 @@ def render_content(tab, year2):
 # Callback ren tab
 @app.callback([
     dash.dependencies.Output('fig_ren_consu_plot', 'figure'),
-    # dash.dependencies.Output('fig_ren_consu_plot1', 'figure'),
-    # dash.dependencies.Output('fig_ren_consu_slider', 'figure'),
+    dash.dependencies.Output('fig_ren_top_10', 'figure'),
     dash.dependencies.Output('fig_stacked_renew', 'figure'),
 ],
 [
@@ -493,19 +563,16 @@ def render_content(tab, year2, energy):
 
     
     if tab == 'tab-3':
-        # return default values for coal-related figures
-        fig1 = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', year2)
-        fig2 = fig_consu_slider('coal_consumption', 'Oil', 'Coal Consumption (terawatt-hours)', year2)
-        fig3 = fig_top10_graph('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
-
         if energy!=None:
             if len(energy)==0:
                 energy=None
-        fig4 = stacked_renewables(year2, energy)
-        print(energy)
-        return  fig1, fig4
+        # return default values for coal-related figures
+        fig1 = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', year2)
+        fig2 = stacked_renewables(year2, energy)
+        fig3 = top_10_renewables(year2, energy)
+        return  fig1, fig2, fig3
     else:
-        return empty_fig, empty_fig
+        return empty_fig, empty_fig, empty_fig
  
 
 
