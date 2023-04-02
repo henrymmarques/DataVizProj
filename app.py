@@ -432,7 +432,7 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider, style={'height': '400px'}),
                 ], className="row", style={"display": "flex", "background-color": "#283142"})
             ], style={"width": "100%"})
-        ]),
+        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
         dcc.Tab(label='Coal', value='tab-2', children=[
            html.Div([
                 html.Div([
@@ -448,7 +448,7 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider, style={'height': '400px'}),
                 ], className="row", style={"display": "flex", "background-color": "#283142"})
             ], style={"width": "100%"})
-        ]),
+        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
         dcc.Tab(label='Renewables', value='tab-3', children=[
            html.Div([
                 html.Div([
@@ -494,9 +494,9 @@ app.layout = html.Div([
 
                 ], className="row", style={"display": "flex", "background-color": "#283142"})
             ], style={"width": "100%"})
-        ]),
-        dcc.Tab(label='Comparison', value='tab-4')
-    ]),
+        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
+        dcc.Tab(label='Comparison', value='tab-4', selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'})
+    ], style={'fontFamily': 'Arial, sans-serif', 'font-size': '18px'}),
     html.Div(id='tabs-content-example-graph')
 ])
 
