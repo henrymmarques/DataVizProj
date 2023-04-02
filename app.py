@@ -409,7 +409,13 @@ app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
-    html.H1('World Energy Data', style={'textAlign': 'center'}),
+    html.Div([
+        html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo.png', height='80px', style={'float': 'left', 'margin':0}),
+        html.H1('Energy Consumption Dashboard', style={'textAlign': 'center', 'margin': 'auto', 'color': 'white'}),
+        
+    ], style={'background-color': '#5F9EA0', 'padding': '60px', 'padding-top': '30px'}),
+
+    # html.Br(style={'background-color': '#5F9EA0'}),
     dcc.Tabs(id="energy_tabs", value='tab-1', children=[
         dcc.Tab(label='Oil', value='tab-1', children=[
             html.Div([
