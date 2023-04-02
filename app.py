@@ -475,7 +475,8 @@ app.layout = html.Div([
                                     , multi=True
                                     , style={'backgroundColor': '#283142', 'font-size': 20, 'color':'white'}
                                     , clearable=False
-                                    , placeholder="Select energy types"),
+                                    , placeholder="Select energy types"
+                                    ),
 
 
                 ], className="row-drop"),
