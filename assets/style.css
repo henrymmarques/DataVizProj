@@ -1,0 +1,54 @@
+#header {
+  background-color: #5F9EA0;
+  padding: 60px;
+  padding-top: 30px;
+}
+
+#header img {
+  height: 80px;
+  float: left;
+  margin: 0;
+}
+
+#header h1 {
+  text-align: center;
+  margin: auto;
+  color: white;
+}
+
+#fig_oil_top_10, #fig_oil_consu_plot, #fig_oil_consu_slider,
+#fig_coal_top_10, #fig_coal_consu_plot, #fig_coal_consu_slider,
+#fig_stacked_renew, #fig_ren_consu_plot, #fig_ren_top_10 {
+    height: 400px;
+}
+
+#fig_oil_choropleth, #fig_coal_choropleth{
+    height: 350px;
+}
+
+.row {
+    display: flex;
+    background-color: #283142;
+    }
+
+.row-slider {
+    width:100%;
+    background-color: #283142;
+}
+
+.row-drop {
+    width: 50%;
+}
+
+footer {
+    text-align: center;
+    /* margin-top: 40px; */
+    padding: 20px;
+    background-color: #5F9EA0;
+  }
+  
+footer h1 {
+margin: 0;
+font-size: 16px;
+font-weight: normal;
+}

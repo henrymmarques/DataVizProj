@@ -413,40 +413,39 @@ app.layout = html.Div([
         html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo.png', height='80px', style={'float': 'left', 'margin':0}),
         html.H1('Energy Consumption Dashboard', style={'textAlign': 'center', 'margin': 'auto', 'color': 'white'}),
         
-    ], style={'background-color': '#5F9EA0', 'padding': '60px', 'padding-top': '30px'}),
+    ], id='header'),
 
-    # html.Br(style={'background-color': '#5F9EA0'}),
     dcc.Tabs(id="energy_tabs", value='tab-1', children=[
-        dcc.Tab(label='Oil', value='tab-1', children=[
+        dcc.Tab(id='oil-tab', label='Oil', value='tab-1', children=[
             html.Div([
                 html.Div([
-                    dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10, style={'height': '400px'}),
+                    dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10),
                 
-                    dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth, style={'height': '350px'}),
-                ], className="row", style={"display": "flex", "background-color": "#283142"}),
+                    dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth),
+                ], className="row"),
                 html.Div([
                     dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
-                ], className="row", style={"width":"100%", "background-color": "#283142"}),
+                ], className="row-slider"),
                 html.Div([
-                    dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot, style={'height': '400px'}),
-                    dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider, style={'height': '400px'}),
-                ], className="row", style={"display": "flex", "background-color": "#283142"})
+                    dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot),
+                    dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider),
+                ], className="row")
             ], style={"width": "100%"})
         ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
         dcc.Tab(label='Coal', value='tab-2', children=[
            html.Div([
                 html.Div([
-                    dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10, style={'height': '400px'}),
+                    dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
                 
-                    dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth, style={'height': '350px'}),
-                ], className="row", style={"display": "flex", "background-color": "#283142"}),
+                    dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
+                ], className="row"),
                 html.Div([
                     dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
-                ], className="row", style={"width":"100%", "background-color": "#283142"}),
+                ], className="row-slider"),
                 html.Div([
-                    dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot, style={'height': '400px'}),
-                    dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider, style={'height': '400px'}),
-                ], className="row", style={"display": "flex", "background-color": "#283142"})
+                    dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
+                    dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
+                ], className="row")
             ], style={"width": "100%"})
         ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
         dcc.Tab(label='Renewables', value='tab-3', children=[
@@ -479,25 +478,30 @@ app.layout = html.Div([
                                     , placeholder="Select energy types"),
 
 
-                ], className="row", style={"width":"50%"}),
+                ], className="row-drop"),
                 html.Div([
-                    dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked, style={'height': '400px'}),
+                    dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked),
 
-                    dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot, style={'height': '400px'}),
-                    # dcc.Graph(id='fig_ren_choropleth', figure=fig_coal_choropleth, style={'height': '350px'}),
-                ], className="row", style={"display": "flex", "background-color": "#283142"}),
+                    dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot),
+                ], className="row"),
                 html.Div([
                     dcc.Slider(id='year-slider3', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
-                ], className="row", style={"width":"100%", "background-color": "#283142"}),
+                ], className="row-slider"),
                 html.Div([
-                    dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10, style={'height': '400px'}),
+                    dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10),
 
-                ], className="row", style={"display": "flex", "background-color": "#283142"})
+                ], className="row")
             ], style={"width": "100%"})
         ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
+
         dcc.Tab(label='Comparison', value='tab-4', selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'})
-    ], style={'fontFamily': 'Arial, sans-serif', 'font-size': '18px'}),
-    html.Div(id='tabs-content-example-graph')
+    ]),
+    html.Div(id='tabs-content-example-graph'),
+    html.Footer([
+ html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo.png', height='80px', style={'float': 'left', 'margin':0}),
+                 html.H1([html.B('Data source: '), 'https://www.kaggle.com/datasets/pralabhpoudel/world-energy-consumption']),
+        html.H1([html.B('Authors: '), 'Guilherme Henriques - Henrique Marques - Vasco Bargas'])
+    ])
 ])
 
 
