@@ -498,7 +498,7 @@ app.layout = html.Div([
     ]),
     html.Div(id='tabs-content-example-graph'),
     html.Footer([
- html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo.png', height='80px', style={'float': 'left', 'margin':0}),
+ html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo-preto.png', height='80px', style={'float': 'left', 'margin':0}),
                  html.H1([html.B('Data source: '), 'https://www.kaggle.com/datasets/pralabhpoudel/world-energy-consumption']),
         html.H1([html.B('Authors: '), 'Guilherme Henriques - Henrique Marques - Vasco Bargas'])
     ])
