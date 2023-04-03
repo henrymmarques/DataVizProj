@@ -416,6 +416,53 @@ def plot_gauge_chart(year, variable, energy_type, color):
 
     return fig
 
+data['non_renewables_consumption']=data[['nuclear_consumption', 'oil_consumption', 'coal_consumption', 'gas_consumption']].sum(axis=1)
+#Create Sunburst
+def sunburst_plot(year, country):
+    # Filter data for 'World'
+    world_data = data[(data['year'] == year) & (data['country'] == country)]
+
+    # Create labels and parents for the sunburst plot
+    labels = ['Renewables', 'Non-Renewables',  'Hydro', 'Solar', 'Biofuel', 'Others', 'Wind', 
+            'Coal', 'Oil', 'Gas', 'Nuclear', 'Fossil']
+    parents = ['','',  'Renewables', 'Renewables', 'Renewables', 'Renewables', 'Renewables',
+                'Non-Renewables', 'Non-Renewables', 'Non-Renewables', 'Non-Renewables']
+
+    # Create values for the sunburst plot
+    values = [world_data['renewables_consumption'].values[0], 
+            world_data['non_renewables_consumption'].values[0],
+            world_data['hydro_consumption'].values[0], 
+            world_data['solar_consumption'].values[0],
+            world_data['biofuel_consumption'].values[0],
+            world_data['other_renewable_consumption'].values[0],
+            world_data['wind_consumption'].values[0],
+            world_data['coal_consumption'].values[0], 
+            world_data['oil_consumption'].values[0],
+            world_data['gas_consumption'].values[0], 
+            world_data['nuclear_consumption'].values[0]]
+
+    # Apply log transformation to values for better visualization
+    # values = np.log(values)
+    # Create a list of colors for each label
+    colors = ['#7FFF00', '#A52A2A', '#7FFF00', '#7FFF00', '#7FFF00', '#7FFF00', '#7FFF00',
+            '#A52A2A', '#A52A2A', '#A52A2A', '#A52A2A', '#A52A2A']
+
+    # Construct the sunburst plot with modified marker attribute
+    sunburst_data = dict(type='sunburst',
+                        labels=labels, 
+                        parents=parents, 
+                        values=values,
+                        branchvalues='total',
+                        marker=dict(colors=colors))
+
+    sunburst_layout = dict(margin=dict(t=50, l=0, r=0, b=0))
+
+    sunburst = go.Figure(data=sunburst_data, layout=sunburst_layout)
+
+    # Set title and show the plot
+    sunburst.update_layout(title= country + ' Energy Consumption in ' + str(year) + ' by Source in TWh', font=dict(size=16))
+    return sunburst
+
 
 
 
@@ -447,8 +494,9 @@ slider_marks_1985 = {str(year): {'label': str(year), 'style': {'writing-mode': '
 slider_marks_1985['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}}
 
 
-fig_gauge_ren = plot_gauge_chart(2010, 'renewables_share_elec', 'Renewables', '#7FFF00')
-fig_gauge_non_ren = plot_gauge_chart(2010, 'non_renewables_share_elec', 'Non Renewables', '#A9A9A9')
+fig_gauge_ren = plot_gauge_chart(1985, 'renewables_share_elec', 'Renewables', '#7FFF00')
+fig_gauge_non_ren = plot_gauge_chart(1985, 'non_renewables_share_elec', 'Non Renewables', '#A9A9A9')
+# fig_sunburst = sunburst_plot(1985, 'World')  
 
 ######################################################
 
@@ -548,6 +596,7 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_gauge_ren', figure=fig_gauge_ren),
                     dcc.Graph(id='fig_gauge_non_ren',
                               figure=fig_gauge_non_ren),
+                    # dcc.Graph(id='fig_sunburst', figure=sunburst_plot),
                 ], className='row'),
             
             html.Div([
