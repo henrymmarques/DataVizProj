@@ -26,6 +26,10 @@
     height: 350px;
 }
 
+/* #fig_gauge_ren, #fig_gauge_non_ren{
+    height: 400px;
+} */
+
 .row {
     display: flex;
     background-color: #283142;

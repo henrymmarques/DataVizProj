@@ -377,6 +377,45 @@ def top_10_renewables(year, energies=None):
 
     return fig
 
+#Creates Gauge indicator
+def plot_gauge_chart(year, variable, energy_type, color):
+    data['non_renewables_share_elec']=data[['nuclear_share_elec', 'oil_share_elec', 'coal_share_elec', 'gas_share_elec']].sum(axis=1)
+    
+    # Filter data for specified year
+    data1 = data[(data['year'] == year)& (data['country']=='World')]
+
+    fig = go.Figure()
+
+    fig.update_layout(
+        title=energy_type + ' Energy Share of Electricity Production',
+        font=dict(size=9, color='white'),
+        width=300,
+        height=250,
+        showlegend=False,  # remove legend on the axis
+        title_y=0.7,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+    )
+
+    fig.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=data1[variable].iloc[0],
+        gauge=dict(
+            axis=dict(range=[None, 100], tickmode='array', tickvals=[]),
+            bar=dict(color=color),
+            bgcolor = 'white',
+            borderwidth = 0,
+            bordercolor = 'gray',
+            steps=[
+                dict(range=[0, data1[variable].iloc[0]], color=color)
+            ],
+        ),
+        domain=dict(x=[0, 1], y=[0, 1]),
+        number=dict(suffix="%", font=dict(color=color, size=25))  # increase size of main value
+    ))
+
+    return fig
+
 
 
 
@@ -387,6 +426,7 @@ def top_10_renewables(year, energies=None):
 # Define the slider marks for every 10 years
 slider_marks = {str(year): {'label': str(year), 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}} for year in range(1965, 2020, 5)}
 slider_marks['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}}
+
 # Create initial plots for 1965
 fig_oil_consu_plot = fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_oil_consu_slider = fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
@@ -401,6 +441,14 @@ fig_coal_choropleth = create_choropleth_map('coal_consumption', 'Oil', 1965)
 fig_ren_consu_plot = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', 1965)
 fig_ren_stacked = stacked_renewables(1965)
 fig_ren_top_10 = top_10_renewables(1965)
+
+#Define the slider from 1985 to 2019
+slider_marks_1985 = {str(year): {'label': str(year), 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}} for year in range(1985, 2020, 5)}
+slider_marks_1985['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}}
+
+
+fig_gauge_ren = plot_gauge_chart(2010, 'renewables_share_elec', 'Renewables', '#7FFF00')
+fig_gauge_non_ren = plot_gauge_chart(2010, 'non_renewables_share_elec', 'Non Renewables', '#A9A9A9')
 
 ######################################################
 
@@ -424,7 +472,7 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth),
                 ], className="row"),
                 html.Div([
-                    dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
+                    dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
                 ], className="row-slider"),
                 html.Div([
                     dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot),
@@ -440,7 +488,7 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
                 ], className="row"),
                 html.Div([
-                    dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
+                    dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
                 ], className="row-slider"),
                 html.Div([
                     dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
@@ -486,7 +534,7 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot),
                 ], className="row"),
                 html.Div([
-                    dcc.Slider(id='year-slider3', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'})
+                    dcc.Slider(id='year-slider3', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
                 ], className="row-slider"),
                 html.Div([
                     dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10),
@@ -495,13 +543,24 @@ app.layout = html.Div([
             ], style={"width": "100%"})
         ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
 
-        dcc.Tab(label='Comparison', value='tab-4', selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'})
+        dcc.Tab(label='Comparison', value='tab-4', children=[
+                html.Div([
+                    dcc.Graph(id='fig_gauge_ren', figure=fig_gauge_ren),
+                    dcc.Graph(id='fig_gauge_non_ren',
+                              figure=fig_gauge_non_ren),
+                ], className='row'),
+            
+            html.Div([
+                    dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
+                ], className="row-slider"),
+    
+        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'})
     ]),
     html.Div(id='tabs-content-example-graph'),
     html.Footer([
  html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo-preto.png', height='80px', style={'float': 'left', 'margin':0}),
+        html.H1([html.B('Authors: '), 'Guilherme Henriques - Henrique Marques - Vasco Bargas']),
                  html.H1([html.B('Data source: '), 'https://www.kaggle.com/datasets/pralabhpoudel/world-energy-consumption']),
-        html.H1([html.B('Authors: '), 'Guilherme Henriques - Henrique Marques - Vasco Bargas'])
     ])
 ])
 
@@ -584,6 +643,27 @@ def render_content(tab, year2, energy):
         return  fig1, fig2, fig3
     else:
         return empty_fig, empty_fig, empty_fig
+
+
+# Callback comparison tab
+@app.callback([
+    dash.dependencies.Output('fig_gauge_ren', 'figure'),
+    dash.dependencies.Output('fig_gauge_non_ren', 'figure'),
+],
+[
+    dash.dependencies.Input('energy_tabs', 'value'),
+    dash.dependencies.Input('year-slider4', 'value'),
+])
+def render_content(tab, year2):
+    empty_fig = go.Figure()
+    empty_fig.update_layout(height=400, margin={'l': 0, 'b': 0, 'r': 0, 't': 0})
+
+    if tab == 'tab-4':
+        fig1 = plot_gauge_chart(year2, 'renewables_share_elec', 'Renewables', '#7FFF00')
+        fig2 = plot_gauge_chart(year2, 'non_renewables_share_elec', 'Non Renewables', '#A9A9A9')
+        return  fig1, fig2
+    else:
+        return empty_fig, empty_fig
  
 
 
