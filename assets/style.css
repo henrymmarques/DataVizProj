@@ -1,6 +1,6 @@
 #header {
   background-color: #5F9EA0;
-  padding: 60px;
+  padding: 40px;
   padding-top: 30px;
 }
 
@@ -14,6 +14,15 @@
   text-align: center;
   margin: auto;
   color: white;
+  font-size: 2.8em;;
+}
+
+#header h2 {
+  text-align: center;
+  margin: auto;
+  color: white;
+  font-size: 1.5em;
+  margin-top: 0.6em;
 }
 
 #fig_oil_top_10, #fig_oil_consu_plot, #fig_oil_consu_slider,
@@ -33,6 +42,10 @@
 .row {
     display: flex;
     background-color: #283142;
+    border-radius: 10px;
+    width: 97%;
+    margin: auto;
+    padding: 10px;
     }
 
 .row-slider {
@@ -42,6 +55,13 @@
 
 .row-drop {
     width: 50%;
+}
+
+.tabs-intro{
+    padding-left: 10px;
+    padding-bottom: 4px;
+    font-size: 1.4vw;
+    color: white;
 }
 
 footer {

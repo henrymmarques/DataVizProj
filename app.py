@@ -516,27 +516,67 @@ server = app.server
 app.layout = html.Div([
     html.Div([
         html.Img(src='https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/logo.png', height='80px', style={'float': 'left', 'margin':0}),
-        html.H1('Energy Consumption Dashboard', style={'textAlign': 'center', 'margin': 'auto', 'color': 'white'}),
+        html.H1('Energy Consumption Dashboard'),
+        # html.Br(),
+        html.H2('Visualize and compare energy consumption across oil, coal, and renewables'),
         
     ], id='header'),
 
     dcc.Tabs(id="energy_tabs", value='tab-1', children=[
-        dcc.Tab(id='oil-tab', label='Oil', value='tab-1', children=[
-            html.Div([
-                html.Div([
-                    dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10),
-                
-                    dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth),
-                ], className="row"),
-                html.Div([
-                    dcc.Slider(id='year-slider', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
-                ], className="row-slider"),
-                html.Div([
-                    dcc.Graph(id='fig_oil_consu_plot', figure=fig_oil_consu_plot),
-                    dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider),
-                ], className="row")
-            ], style={"width": "100%"})
-        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
+        dcc.Tab(id='oil-tab',label='Oil',value='tab-1',children=[
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Br(),
+                            html.Div(id="tabs-intro", className="tabs-intro", children=[
+                                'Explore the global ', html.Strong('consumption of oil '),
+                                'with our choropleth map and top 10 countries plot provide a comprehensive view of oil consumption around the world.',
+                                html.P('Use the slider below the plots to see how consumption has changed over time from 1965 to 2019.'),    
+                                html.P('Gain insights into the most oil-hungry countries and their trends over time.')], 
+                                     ),
+
+                        ],
+                        className='row', style={'background-color': '#3c4a63','border-radius': '10px',
+                        'width': '97%',
+                        'margin': 'auto'}
+                    ),
+                    html.Br(),
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='fig_oil_choropleth', figure=fig_oil_choropleth),
+                            dcc.Graph(id='fig_oil_top_10', figure=fig_oil_top_10)
+                        ],
+                        className='row', style={'background-color': '#3c4a63', 'padding': '10px'}
+                    ),
+                    html.Div(
+                        children=[
+                            dcc.Slider(
+                                id='year-slider',
+                                min=1965,
+                                max=2019,
+                                value=1965,
+                                marks=slider_marks,
+                                step=1,
+                                tooltip={'always_visible': True, 'placement': 'top'},
+                                updatemode='drag'
+                            )
+                        ],
+                        className='row-slider'),
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='fig_oil_consu_plot',figure=fig_oil_consu_plot),
+                            dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider)
+                        ],
+                        className='row', style={'background-color': '#3c4a63','padding': '10px'}
+                    )
+                ],
+                style={'width': '100%','background-color': '#283142'}
+            )
+            
+        ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },
+        style={'background-color': '#5F9EA0','filter': 'brightness(70%)'}
+        ),
         dcc.Tab(label='Coal', value='tab-2', children=[
            html.Div([
                 html.Div([
@@ -552,7 +592,8 @@ app.layout = html.Div([
                     dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
                 ], className="row")
             ], style={"width": "100%"})
-        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
+        ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
+        style={'background-color': "#5F9EA0", "filter": "brightness(70%)"}),
         dcc.Tab(label='Renewables', value='tab-3', children=[
            html.Div([
                 html.Div([
@@ -598,7 +639,8 @@ app.layout = html.Div([
 
                 ], className="row")
             ], style={"width": "100%"})
-        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
+        ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
+        style={'background-color': "#5F9EA0", "filter": "brightness(70%)"}),
             
         dcc.Tab(label='Comparison', value='tab-4', children=[
                 html.Div([
@@ -619,7 +661,8 @@ app.layout = html.Div([
                     dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
                 ], className="row-slider")
     
-        ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'})
+        ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
+        style={'background-color': "#5F9EA0", "filter": "brightness(70%)"})
     ]),
     html.Div(id='tabs-content-example-graph'),
     html.Footer([
