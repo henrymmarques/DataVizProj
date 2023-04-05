@@ -8,6 +8,7 @@ import requests
 import geopandas as gpd
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+import traceback
 
 # Load the data
 data = pd.read_csv(
@@ -378,11 +379,11 @@ def top_10_renewables(year, energies=None):
     return fig
 
 #Creates Gauge indicator
-def plot_gauge_chart(year, variable, energy_type, color):
+def plot_gauge_chart(year, variable, energy_type, color, country):
     data['non_renewables_share_elec']=data[['nuclear_share_elec', 'oil_share_elec', 'coal_share_elec', 'gas_share_elec']].sum(axis=1)
     
     # Filter data for specified year
-    data1 = data[(data['year'] == year)& (data['country']=='World')]
+    data1 = data[(data['year'] == year)& (data['country']==country)]
 
     fig = go.Figure()
 
@@ -416,8 +417,8 @@ def plot_gauge_chart(year, variable, energy_type, color):
 
     return fig
 
-data['non_renewables_consumption']=data[['nuclear_consumption', 'oil_consumption', 'coal_consumption', 'gas_consumption']].sum(axis=1)
 #Create Sunburst
+data['non_renewables_consumption']=data[['nuclear_consumption', 'oil_consumption', 'coal_consumption', 'gas_consumption']].sum(axis=1)
 def sunburst_plot(year, country):
     # Filter data for 'World'
     world_data = data[(data['year'] == year) & (data['country'] == country)]
@@ -460,7 +461,10 @@ def sunburst_plot(year, country):
     sunburst = go.Figure(data=sunburst_data, layout=sunburst_layout)
 
     # Set title and show the plot
-    sunburst.update_layout(title= country + ' Energy Consumption in ' + str(year) + ' by Source in TWh', font=dict(size=16))
+    sunburst.update_layout(title= country + ' Energy Consumption in ' + str(year) + ' by Source in TWh', 
+                           font=dict(size=12, color='white'),
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            paper_bgcolor="rgba(0,0,0,0)",)
     return sunburst
 
 
@@ -494,9 +498,14 @@ slider_marks_1985 = {str(year): {'label': str(year), 'style': {'writing-mode': '
 slider_marks_1985['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}}
 
 
-fig_gauge_ren = plot_gauge_chart(1985, 'renewables_share_elec', 'Renewables', '#7FFF00')
-fig_gauge_non_ren = plot_gauge_chart(1985, 'non_renewables_share_elec', 'Non Renewables', '#A9A9A9')
-# fig_sunburst = sunburst_plot(1985, 'World')  
+fig_gauge_ren = plot_gauge_chart(1985, 'renewables_share_elec', 'Renewables', '#7FFF00', 'World')
+fig_gauge_non_ren = plot_gauge_chart(1985, 'non_renewables_share_elec', 'Non Renewables', '#A52A2A', 'World')
+fig_sunburst = sunburst_plot(1985, 'World')  
+
+# Extract unique country names from the DataFrame to dropdown
+country_options = [{'label': country, 'value': country} for country in
+                    data[data[['renewables_consumption', 'non_renewables_consumption', 'hydro_consumption', 'solar_consumption', 'biofuel_consumption', 'wind_consumption', 'coal_consumption', 'oil_consumption', 'gas_consumption', 'nuclear_consumption', 'fossil_fuel_consumption']].notnull()
+                         .all(axis=1)]['country'].unique()]
 
 ######################################################
 
@@ -550,19 +559,19 @@ app.layout = html.Div([
     
                     dcc.Dropdown(id='energy_dropdown', options=[
                                                     {
-                                                        'label': html.Span(['Hydro'], style={'background-color': '#003366', 'font-size': 20}),
+                                                        'label': html.Span(['Hydro']),
                                                         'value':'hydro_consumption'
                                                     },
-                                                    {'label': html.Span(['Solar'], style={'background-color': '#FFD700', 'font-size': 20}),
+                                                    {'label': html.Span(['Solar']),
                                                         'value':'solar_consumption'
                                                      },
-                                                     {'label': html.Span(['Biofuel'], style={'background-color': '#008000', 'font-size': 20}),
+                                                     {'label': html.Span(['Biofuel']),
                                                         'value':'biofuel_consumption'
                                                      },
-                                                     {'label': html.Span(['Wind'], style={'background-color': '#92C6FF', 'font-size': 20}),
+                                                     {'label': html.Span(['Wind']),
                                                         'value':'wind_consumption'
                                                      },
-                                                     {'label': html.Span(['Other Renewables'], style={'background-color': '#0066CC', 'font-size': 20}),
+                                                     {'label': html.Span(['Other Renewables']),
                                                         'value':'other_renewable_consumption'
                                                      },
 
@@ -590,18 +599,25 @@ app.layout = html.Div([
                 ], className="row")
             ], style={"width": "100%"})
         ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'}),
-
+            
         dcc.Tab(label='Comparison', value='tab-4', children=[
+                html.Div([
+                    dcc.Dropdown(
+                        id='country_dropdown',
+                        options = country_options,
+                        value='World',
+                    )
+                ], className='row-drop'),
                 html.Div([
                     dcc.Graph(id='fig_gauge_ren', figure=fig_gauge_ren),
                     dcc.Graph(id='fig_gauge_non_ren',
                               figure=fig_gauge_non_ren),
-                    # dcc.Graph(id='fig_sunburst', figure=sunburst_plot),
+                        dcc.Graph(id='fig_sunburst', figure=fig_sunburst),
+                    
                 ], className='row'),
-            
             html.Div([
                     dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
-                ], className="row-slider"),
+                ], className="row-slider")
     
         ], selected_style={'background-color': "#5F9EA0", 'border': '3px solid black', 'font-weight': 'bold'})
     ]),
@@ -698,21 +714,24 @@ def render_content(tab, year2, energy):
 @app.callback([
     dash.dependencies.Output('fig_gauge_ren', 'figure'),
     dash.dependencies.Output('fig_gauge_non_ren', 'figure'),
+    dash.dependencies.Output('fig_sunburst', 'figure'),
 ],
 [
     dash.dependencies.Input('energy_tabs', 'value'),
     dash.dependencies.Input('year-slider4', 'value'),
+    dash.dependencies.Input('country_dropdown', 'value'),
 ])
-def render_content(tab, year2):
+def render_content(tab, year2, country):
     empty_fig = go.Figure()
     empty_fig.update_layout(height=400, margin={'l': 0, 'b': 0, 'r': 0, 't': 0})
 
     if tab == 'tab-4':
-        fig1 = plot_gauge_chart(year2, 'renewables_share_elec', 'Renewables', '#7FFF00')
-        fig2 = plot_gauge_chart(year2, 'non_renewables_share_elec', 'Non Renewables', '#A9A9A9')
-        return  fig1, fig2
+        fig1 = plot_gauge_chart(year2, 'renewables_share_elec', 'Renewables', '#7FFF00', country)
+        fig2 = plot_gauge_chart(year2, 'non_renewables_share_elec', 'Non Renewables', '#A52A2A', country)
+        fig3 = sunburst_plot(year2, country)
+        return  fig1, fig2, fig3
     else:
-        return empty_fig, empty_fig
+        return empty_fig, empty_fig, empty_fig
  
 
 
