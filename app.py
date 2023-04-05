@@ -213,12 +213,12 @@ def create_choropleth_map(variable, energy_type, year):
         locations=oil_data_year["iso_code"],
         z=oil_data_year[variable],
         colorscale="YlOrRd",
-        zmin=0,
-        zmax=1000,
+        zmin=oil_data_year[(oil_data_year['year']==year) & (oil_data_year['country']!='World')][variable].min(),
+        zmax=oil_data_year[(oil_data_year['year']==year) & (oil_data_year['country']!='World')][variable].sort_values(ascending=False).iloc[1],
         marker_line_width=0.5,
         marker_line_color="white",
         text=oil_data_year["country"],
-        hovertemplate="<b>%{text}</b><br>" + energy_type + " Consumption: %{z:.2f}",
+        hovertemplate="<b>%{text}</b><br>" + energy_type + " Consumption: %{z:.2f} TWh",
         name='',
     ))
 
@@ -239,7 +239,7 @@ def create_choropleth_map(variable, energy_type, year):
     fig.update_layout(
         title= energy_type + " Consumption per Country in {}".format(year),
         geo_scope="world",
-        margin={"l": 0, "r": 30, "t": 50, "b": 0},
+        margin={"l": 0, "r": 30, "t": 40, "b": 0},
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(size=12, color='white'), ##all font
@@ -247,7 +247,7 @@ def create_choropleth_map(variable, energy_type, year):
     )
     
     # Update the title with the current year
-    fig.update_layout(title={"text": energy_type + " Consumption per Country in {}".format(year), "font": {"size": 24}})
+    fig.update_layout(title={"text": energy_type + " Consumption per Country in {}".format(year)})
 
     return fig
 
@@ -537,10 +537,7 @@ app.layout = html.Div([
                                      ),
 
                         ],
-                        className='row', style={'background-color': '#3c4a63','border-radius': '10px',
-                        'width': '97%',
-                        'margin': 'auto'}
-                    ),
+                        className='row-tabs-intro' ),
                     html.Br(),
                     html.Div(
                         children=[
@@ -549,6 +546,16 @@ app.layout = html.Div([
                         ],
                         className='row', style={'background-color': '#3c4a63', 'padding': '10px'}
                     ),
+                    html.Div(
+                        children=[
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of oil.'], 
+                                     ),
+
+                        ],
+                        className='row-tabs-intro-final' ),
+                    html.Br(),
                     html.Div(
                         children=[
                             dcc.Slider(
@@ -563,6 +570,7 @@ app.layout = html.Div([
                             )
                         ],
                         className='row-slider'),
+                        
                     html.Div(
                         children=[
                             dcc.Graph(id='fig_oil_consu_plot',figure=fig_oil_consu_plot),
@@ -571,7 +579,7 @@ app.layout = html.Div([
                         className='row', style={'background-color': '#3c4a63','padding': '10px'}
                     )
                 ],
-                style={'width': '100%','background-color': '#283142'}
+                className='main_row'
             )
             
         ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },

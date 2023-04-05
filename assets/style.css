@@ -25,10 +25,15 @@
   margin-top: 0.6em;
 }
 
-#fig_oil_top_10, #fig_oil_consu_plot, #fig_oil_consu_slider,
-#fig_coal_top_10, #fig_coal_consu_plot, #fig_coal_consu_slider,
+#fig_oil_top_10, #fig_oil_consu_plot, 
+#fig_coal_top_10, #fig_coal_consu_plot,
 #fig_stacked_renew, #fig_ren_consu_plot, #fig_ren_top_10 {
     height: 400px;
+}
+
+#fig_oil_consu_slider, #fig_coal_consu_slider{
+    height: 400px;
+    width: 1000px;
 }
 
 #fig_oil_choropleth, #fig_coal_choropleth{
@@ -57,11 +62,34 @@
     width: 50%;
 }
 
+.main_row {
+    width: 100%;
+    background-color: #283142;
+}
+.row-tabs-intro{
+    display: flex;
+    background-color: #c4ae70;
+    border-radius: 10px;
+    width: 97%;
+    margin: auto;
+    padding: 10px;
+}
+
+.row-tabs-intro-final{
+    display: flex;
+    background-color: #c4ae70;
+    border-radius: 10px;
+    width: 97%;
+    margin: auto;
+    padding: 10px;
+    margin-top:25px;
+}
+
 .tabs-intro{
     padding-left: 10px;
     padding-bottom: 4px;
     font-size: 1.4vw;
-    color: white;
+    color: black;
 }
 
 footer {
