@@ -839,7 +839,7 @@ app.layout = html.Div([
                         className='row-tabs-intro' ),
                     html.Div([
                     html.Div([
-                        html.Div('TEXTTTTTTTTTTT'),
+                        html.Div('EXPLAIN THE GAUGE CHARTS...........', style={'color': 'white'}),
                         html.Div([
                             dcc.Graph(id='fig_gauge_ren',
                                       figure=fig_gauge_ren),
