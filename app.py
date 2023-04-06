@@ -4,6 +4,7 @@ from dash import html
 import plotly.graph_objs as go
 import plotly.express as px
 import pandas as pd
+import numpy as np
 import requests
 import geopandas as gpd
 import warnings
@@ -391,6 +392,7 @@ def top_10_renewables(year, energies=None):
 
 #Creates Gauge indicator
 def plot_gauge_chart(year, variable, energy_type, color, country):
+    
     data['non_renewables_share_elec']=data[['nuclear_share_elec', 'oil_share_elec', 'coal_share_elec', 'gas_share_elec']].sum(axis=1)
     
     # Filter data for specified year
@@ -399,7 +401,7 @@ def plot_gauge_chart(year, variable, energy_type, color, country):
     fig = go.Figure()
 
     fig.update_layout(
-        title=energy_type + ' Energy Share of Electricity Production',
+        title=energy_type + ' pct. of Electricity Prod.',
         font=dict(size=9, color='white'),
         width=300,
         height=250,
@@ -465,7 +467,8 @@ def sunburst_plot(year, country):
                         parents=parents, 
                         values=values,
                         branchvalues='total',
-                        marker=dict(colors=colors))
+                        marker=dict(colors=colors, line=dict(width=2, color='white')))
+
 
     sunburst_layout = dict(margin=dict(t=50, l=0, r=0, b=0))
 
@@ -478,6 +481,65 @@ def sunburst_plot(year, country):
                             paper_bgcolor="rgba(0,0,0,0)",)
     return sunburst
 
+def create_scatter(year):
+   # filter data for the year 2019
+    data_scatter = data[(data['year'] == year) & (data['country'] != 'World')]
+
+    # sort data by non_renewables_consumption in descending order and select top 10 rows
+    data_top10 = data_scatter.sort_values('non_renewables_consumption', ascending=False)
+
+    # create a dictionary to map region to color
+    color_dict = {'Africa': '#008080', # teal
+              'North America': '#FFA07A', # light salmon
+              'Asia': '#FFD700', # gold
+              'Europe': '#EE82EE', # violet
+              'Oceania': '#00FFFF', # cyan
+              'South America': '#32CD32'} # lime green
+    # create an empty list to store the traces
+    traces = []
+
+    # iterate over the regions and create a trace for each one
+    for region in color_dict.keys():
+        # filter the data by region
+        data_region = data_top10[data_top10['region'] == region]
+        # create a scatter trace for the region
+        trace = go.Scatter(
+            x=np.log(data_region['renewables_consumption']),
+            y=np.log(data_region['non_renewables_consumption']),
+            mode='markers',
+            marker=dict(
+                size=10,
+                color=color_dict[region],
+            ),
+            name=region, # set the name for the legend
+            text=data_region['country'],
+        )
+        # append the trace to the list
+        traces.append(trace)
+
+    # create the figure with all the traces
+    fig = go.Figure(data=traces)
+
+    fig.update_layout(
+        title='Renewables vs Non-Renewables Consumption in ' + str(year),
+        xaxis_title='Renewables Consumption',
+        yaxis_title='Non-Renewables Consumption',
+        hovermode='closest',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(size=12, color='white'),
+        xaxis_range=[ 1, np.log(data_top10[data_top10['year']==year]['renewables_consumption'].max())+0.5],
+        yaxis_range=[np.log(data_top10[data_top10['year']==year]['non_renewables_consumption'].min() or 1), np.log(data_top10['non_renewables_consumption'][data_top10['year']==2019].max())+0.5],
+        legend=dict(
+            orientation='h', # set the legend orientation to horizontal
+            yanchor='bottom', # set the anchor for the y position of the legend
+            y=1.02, # adjust the y position of the legend
+            xanchor='right', # set the anchor for the x position of the legend
+            x=1, # adjust the x position of the legend
+        ),
+    )
+
+    return fig
 
 
 
@@ -513,6 +575,7 @@ slider_marks_1985['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizon
 fig_gauge_ren = plot_gauge_chart(1985, 'renewables_share_elec', 'Renewables', '#7FFF00', 'World')
 fig_gauge_non_ren = plot_gauge_chart(1985, 'non_renewables_share_elec', 'Non Renewables', '#A52A2A', 'World')
 fig_sunburst = sunburst_plot(1985, 'World')  
+fig_scatter = create_scatter(1985)
 
 # Extract unique country names from the DataFrame to dropdown
 country_options = [{'label': country, 'value': country} for country in
@@ -762,12 +825,17 @@ app.layout = html.Div([
                     )
                 ], className='row-drop'),
                 html.Div([
-                    dcc.Graph(id='fig_gauge_ren', figure=fig_gauge_ren),
-                    dcc.Graph(id='fig_gauge_non_ren',
-                              figure=fig_gauge_non_ren),
-                        dcc.Graph(id='fig_sunburst', figure=fig_sunburst),
-                    
-                ], className='row'),
+    html.Div([
+        html.Div([
+        dcc.Graph(id='fig_gauge_ren', figure=fig_gauge_ren),
+        dcc.Graph(id='fig_gauge_non_ren', figure=fig_gauge_non_ren),
+        ], className='row'),
+        dcc.Graph(id='fig_scatter', figure=fig_scatter),
+    ], className='six columns'),
+    html.Div([
+        dcc.Graph(id='fig_sunburst', figure=fig_sunburst),
+    ], className='six columns'),
+], className='row'),
             html.Div([
                     dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
                 ], className="row-slider")
@@ -871,6 +939,7 @@ def render_content(tab, year2, energy):
     dash.dependencies.Output('fig_gauge_ren', 'figure'),
     dash.dependencies.Output('fig_gauge_non_ren', 'figure'),
     dash.dependencies.Output('fig_sunburst', 'figure'),
+    dash.dependencies.Output('fig_scatter', 'figure'),
 ],
 [
     dash.dependencies.Input('energy_tabs', 'value'),
@@ -882,12 +951,15 @@ def render_content(tab, year2, country):
     empty_fig.update_layout(height=400, margin={'l': 0, 'b': 0, 'r': 0, 't': 0})
 
     if tab == 'tab-4':
+        if country==None:
+            country='World'
         fig1 = plot_gauge_chart(year2, 'renewables_share_elec', 'Renewables', '#7FFF00', country)
         fig2 = plot_gauge_chart(year2, 'non_renewables_share_elec', 'Non Renewables', '#A52A2A', country)
         fig3 = sunburst_plot(year2, country)
-        return  fig1, fig2, fig3
+        fig4 = create_scatter(year2)
+        return  fig1, fig2, fig3, fig4
     else:
-        return empty_fig, empty_fig, empty_fig
+        return empty_fig, empty_fig, empty_fig, empty_fig
  
 
 

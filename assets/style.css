@@ -30,6 +30,10 @@
  #fig_ren_consu_plot {
     height: 400px;
 }
+#fig_scatter{
+    width:700px;
+    height: 400px;
+}
 
 #fig_oil_consu_slider, #fig_coal_consu_slider, #fig_ren_top_10{
     height: 400px;
