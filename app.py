@@ -206,7 +206,7 @@ def create_choropleth_map(variable, energy_type, year, renewables):
             variable = 'renewables_consumption'
             energy_type = 'Renewables'
         else:
-            energy_type=variable[0]
+            energy_type=variable[0].split('_')[0].capitalize()
             variable=variable[0]
     
 
@@ -664,6 +664,12 @@ app.layout = html.Div([
                 children=[
                     html.Div(
                         children=[
+                            html.Div( className="tabs-intro", children=[
+                                'Explore the global ', html.Strong('consumption of renewable energy '),
+                                'with our .......................',
+                                html.P('Use the slider ..... FALAR DA SELECAO DE ENERGIAS............1965 to 2019.'),    
+                                html.P('GSDFSDFSDFS.')], 
+                                     ),
                             html.Div([
     
                                 dcc.Dropdown(id='energy_dropdown', options=[
@@ -692,16 +698,10 @@ app.layout = html.Div([
                                     , placeholder="Select energy types"
                                     ),
                                 ], className="row-drop"),
-                            html.Br(),
-                            html.Div( className="tabs-intro", children=[
-                                'Explore the global ', html.Strong('consumption of renewable energy '),
-                                'with our .......................',
-                                html.P('Use the slider ..... FALAR DA SELECAO DE ENERGIAS............1965 to 2019.'),    
-                                html.P('GSDFSDFSDFS.')], 
-                                     ),
 
                         ],
                         className='row-tabs-intro' ),
+                            html.Br(),
                     html.Br(),
                     html.Div(
                         children=[
