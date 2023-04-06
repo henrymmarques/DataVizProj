@@ -814,34 +814,91 @@ app.layout = html.Div([
         ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },
         style={'background-color': '#5F9EA0','filter': 'brightness(70%)'}
         ),
-        
-            
-        dcc.Tab(label='Comparison', value='tab-4', children=[
-                html.Div([
+
+        dcc.Tab(label='Comparison', value='tab-4',children=[
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Explore the global ', html.Strong('consumption of coal '),
+                                'with sdfsdfsdfsdf......................',
+                                html.P('Use the slider below the plots to ................ 1985 to 2019.'),    
+                                html.P('Gain insights into TRTRTTTTTTTTTTTTTTT.')], 
+                                     ),
+                           html.Div([
                     dcc.Dropdown(
                         id='country_dropdown',
-                        options = country_options,
+                        options=country_options,
                         value='World',
                     )
                 ], className='row-drop'),
-                html.Div([
-    html.Div([
-        html.Div([
-        dcc.Graph(id='fig_gauge_ren', figure=fig_gauge_ren),
-        dcc.Graph(id='fig_gauge_non_ren', figure=fig_gauge_non_ren),
-        ], className='row'),
-        dcc.Graph(id='fig_scatter', figure=fig_scatter),
-    ], className='six columns'),
-    html.Div([
-        dcc.Graph(id='fig_sunburst', figure=fig_sunburst),
-    ], className='six columns'),
-], className='row'),
-            html.Div([
-                    dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
-                ], className="row-slider")
-    
-        ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
-        style={'background-color': "#5F9EA0", "filter": "brightness(70%)"})
+
+                        ],
+                        className='row-tabs-intro' ),
+                    html.Div([
+                    html.Div([
+                        html.Div('TEXTTTTTTTTTTT'),
+                        html.Div([
+                            dcc.Graph(id='fig_gauge_ren',
+                                      figure=fig_gauge_ren),
+                            dcc.Graph(id='fig_gauge_non_ren',
+                                      figure=fig_gauge_non_ren),
+                        ], className='row'),
+                        dcc.Graph(id='fig_scatter', figure=fig_scatter),
+                    ], className='six columns'),
+                    html.Div([
+                        dcc.Graph(id='fig_sunburst', figure=fig_sunburst),
+                    ], className='six columns'),
+                ], className='row'),
+                    html.Div(
+                        children=[
+                            dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985,
+                               step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
+                            
+                        ],
+                        className='row-slider'),
+                    
+                ],
+                className='main_row'
+            )
+            
+        ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },
+        style={'background-color': '#5F9EA0','filter': 'brightness(70%)'}
+        ),
+        
+            
+    #     dcc.Tab(label='Comparison', value='tab-4', children=[
+    #             html.Div([
+    #                 dcc.Dropdown(
+    #                     id='country_dropdown',
+    #                     options=country_options,
+    #                     value='World',
+    #                 )
+    #             ], className='row-drop'),
+    #             html.Div([
+    #                 html.Div([
+    #                     html.Div('TEXTTTTTTTTTTT'),
+    #                     html.Div([
+    #                         dcc.Graph(id='fig_gauge_ren',
+    #                                   figure=fig_gauge_ren),
+    #                         dcc.Graph(id='fig_gauge_non_ren',
+    #                                   figure=fig_gauge_non_ren),
+    #                     ], className='row'),
+    #                     dcc.Graph(id='fig_scatter', figure=fig_scatter),
+    #                 ], className='six columns'),
+    #                 html.Div([
+    #                     dcc.Graph(id='fig_sunburst', figure=fig_sunburst),
+    #                 ], className='six columns'),
+    #             ], className='row'),
+    #             html.Div([
+    #                 dcc.Slider(id='year-slider4', min=1985, max=2019, value=1985, marks=slider_marks_1985,
+    #                            step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
+    #             ], className="row-slider")
+
+    #             ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
+    #             style={'background-color': "#5F9EA0", "filter": "brightness(70%)"})
     ]),
     html.Div(id='tabs-content-example-graph'),
     html.Footer([
