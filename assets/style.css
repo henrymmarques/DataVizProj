@@ -27,13 +27,18 @@
 
 #fig_oil_top_10, #fig_oil_consu_plot, 
 #fig_coal_top_10, #fig_coal_consu_plot,
-#fig_stacked_renew, #fig_ren_consu_plot, #fig_ren_top_10 {
+ #fig_ren_consu_plot {
     height: 400px;
 }
 
-#fig_oil_consu_slider, #fig_coal_consu_slider{
+#fig_oil_consu_slider, #fig_coal_consu_slider, #fig_ren_top_10{
     height: 400px;
     width: 1000px;
+
+}
+#fig_stacked_renew, #fig_ren_top_10{
+    height: 400px;
+    width: 600px;
 }
 
 #fig_oil_choropleth, #fig_coal_choropleth{
@@ -83,6 +88,7 @@
     margin: auto;
     padding: 10px;
     margin-top:25px;
+    margin-bottom:20px;
 }
 
 .tabs-intro{

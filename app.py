@@ -200,8 +200,16 @@ def fig_top10_graph(variable, energy_type, xaxis_title, year):
 
 
 # Creates choropleth by country with a slider by year. Some energy consumption
-def create_choropleth_map(variable, energy_type, year):
+def create_choropleth_map(variable, energy_type, year, renewables):
+    if renewables==True:
+        if variable==None:
+            variable = 'renewables_consumption'
+            energy_type = 'Renewables'
+        else:
+            energy_type=variable[0]
+            variable=variable[0]
     
+
     # df for oil_consumption plots
     consumption_df = data[data[variable].notna()][[variable, 'year', 'iso_code', 'country']]
 
@@ -287,7 +295,10 @@ def stacked_renewables(year, energies=None):
     # Update the layout
     fig.update_layout(
         barmode='stack',
-        title='Renewable Energy Consumption by Region in {}'.format(year),
+       title={
+        'text': 'Renewable Energy Consumption by Region in {}'.format(year),
+        'x': 0.5 # set title_x to 0.5 to center the title
+    },
         xaxis_title='Region',
         yaxis_title='Renewable Energy Consumption (%)',
         hovermode='closest',
@@ -303,7 +314,7 @@ def stacked_renewables(year, energies=None):
             xanchor='right',
             x=1
         ),
-        margin=dict(l=50, r=50, t=100, b=50),
+        margin=dict(l=150, r=0, t=100, b=0),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(size=12, color='white'), ##all font
@@ -370,7 +381,7 @@ def top_10_renewables(year, energies=None):
             xanchor='right',
             x=1
         ),
-        margin=dict(l=200, r=50, t=100, b=50),
+        margin=dict(l=0, r=0, t=100, b=0),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(size=12, color='white'),
@@ -482,16 +493,17 @@ slider_marks['2019'] = {'label': '2019', 'style': {'writing-mode': 'horizontal-t
 fig_oil_consu_plot = fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_oil_consu_slider = fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_oil_top_10 = fig_top10_graph('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
-fig_oil_choropleth = create_choropleth_map('oil_consumption', 'Oil', 1965)
+fig_oil_choropleth = create_choropleth_map('oil_consumption', 'Oil', 1965, False)
 
 fig_coal_consu_plot = fig_world_consu('coal_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_coal_consu_slider = fig_consu_slider('coal_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
 fig_coal_top_10 = fig_top10_graph('coal_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', 1965)
-fig_coal_choropleth = create_choropleth_map('coal_consumption', 'Oil', 1965)
+fig_coal_choropleth = create_choropleth_map('coal_consumption', 'Oil', 1965, False)
 
 fig_ren_consu_plot = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', 1965)
 fig_ren_stacked = stacked_renewables(1965)
 fig_ren_top_10 = top_10_renewables(1965)
+fig_ren_choropleth = create_choropleth_map(None, None, 1965, True)
 
 #Define the slider from 1985 to 2019
 slider_marks_1985 = {str(year): {'label': str(year), 'style': {'writing-mode': 'horizontal-tb', 'font-size': '16px'}} for year in range(1985, 2020, 5)}
@@ -546,15 +558,6 @@ app.layout = html.Div([
                         ],
                         className='row', style={'background-color': '#3c4a63', 'padding': '10px'}
                     ),
-                    html.Div(
-                        children=[
-                            html.Br(),
-                            html.Div( className="tabs-intro", children=[
-                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of oil.'], 
-                                     ),
-
-                        ],
-                        className='row-tabs-intro-final' ),
                     html.Br(),
                     html.Div(
                         children=[
@@ -573,6 +576,15 @@ app.layout = html.Div([
                         
                     html.Div(
                         children=[
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of oil.'], 
+                                     ),
+
+                        ],
+                        className='row-tabs-intro-final' ),
+                    html.Div(
+                        children=[
                             dcc.Graph(id='fig_oil_consu_plot',figure=fig_oil_consu_plot),
                             dcc.Graph(id='fig_oil_consu_slider', figure=fig_oil_consu_slider)
                         ],
@@ -585,28 +597,76 @@ app.layout = html.Div([
         ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },
         style={'background-color': '#5F9EA0','filter': 'brightness(70%)'}
         ),
-        dcc.Tab(label='Coal', value='tab-2', children=[
-           html.Div([
-                html.Div([
-                    dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10),
-                
-                    dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
-                ], className="row"),
-                html.Div([
-                    dcc.Slider(id='year-slider2', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
-                ], className="row-slider"),
-                html.Div([
-                    dcc.Graph(id='fig_coal_consu_plot', figure=fig_coal_consu_plot),
-                    dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider),
-                ], className="row")
-            ], style={"width": "100%"})
-        ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
-        style={'background-color': "#5F9EA0", "filter": "brightness(70%)"}),
-        dcc.Tab(label='Renewables', value='tab-3', children=[
-           html.Div([
-                html.Div([
+        dcc.Tab(id='coal-tab',label='Coal',value='tab-2',children=[
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Explore the global ', html.Strong('consumption of coal '),
+                                'with our choropleth map and top 10 countries plot provide a comprehensive view of coal consumption around the world.',
+                                html.P('Use the slider below the plots to see how consumption has changed over time from 1965 to 2019.'),    
+                                html.P('Gain insights into the most coal-hungry countries and their trends over time.')], 
+                                     ),
+
+                        ],
+                        className='row-tabs-intro' ),
+                    html.Br(),
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='fig_coal_choropleth', figure=fig_coal_choropleth),
+                            dcc.Graph(id='fig_coal_top_10', figure=fig_coal_top_10)
+                        ],
+                        className='row', style={'background-color': '#3c4a63', 'padding': '10px'}
+                    ),
+                    html.Br(),
+                    html.Div(
+                        children=[
+                            dcc.Slider(
+                                id='year-slider2',
+                                min=1965,
+                                max=2019,
+                                value=1965,
+                                marks=slider_marks,
+                                step=1,
+                                tooltip={'always_visible': True, 'placement': 'top'},
+                                updatemode='drag'
+                            )
+                        ],
+                        className='row-slider'),
+                    html.Div(
+                        children=[
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of coal.'], 
+                                     ),
+
+                        ],
+                        className='row-tabs-intro-final' ),
+                        
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='fig_coal_consu_plot',figure=fig_coal_consu_plot),
+                            dcc.Graph(id='fig_coal_consu_slider', figure=fig_coal_consu_slider)
+                        ],
+                        className='row', style={'background-color': '#3c4a63','padding': '10px'}
+                    )
+                ],
+                className='main_row'
+            )
+            
+        ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },
+        style={'background-color': '#5F9EA0','filter': 'brightness(70%)'}
+        ),
+        dcc.Tab(label='Renewables', value='tab-3',children=[
+            html.Div(
+                children=[
+                    html.Div(
+                        children=[
+                            html.Div([
     
-                    dcc.Dropdown(id='energy_dropdown', options=[
+                                dcc.Dropdown(id='energy_dropdown', options=[
                                                     {
                                                         'label': html.Span(['Hydro']),
                                                         'value':'hydro_consumption'
@@ -631,24 +691,67 @@ app.layout = html.Div([
                                     , clearable=False
                                     , placeholder="Select energy types"
                                     ),
+                                ], className="row-drop"),
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Explore the global ', html.Strong('consumption of renewable energy '),
+                                'with our .......................',
+                                html.P('Use the slider ..... FALAR DA SELECAO DE ENERGIAS............1965 to 2019.'),    
+                                html.P('GSDFSDFSDFS.')], 
+                                     ),
 
+                        ],
+                        className='row-tabs-intro' ),
+                    html.Br(),
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='fig_ren_choropleth', figure=fig_ren_choropleth),
+                            # html.Div('ola'),
+                            dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10),
+                        ],
+                        className='row', style={'background-color': '#3c4a63', 'padding': '10px'}
+                    ),
+                    html.Br(),
+                    html.Div(
+                        children=[
+                            dcc.Slider(
+                                id='year-slider3',
+                                min=1965,
+                                max=2019,
+                                value=1965,
+                                marks=slider_marks,
+                                step=1,
+                                tooltip={'always_visible': True, 'placement': 'top'},
+                                updatemode='drag'
+                            )
+                        ],
+                        className='row-slider'),
+                    html.Div(
+                        children=[
+                            html.Br(),
+                            html.Div( className="tabs-intro", children=[
+                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of coal.'], 
+                                     ),
 
-                ], className="row-drop"),
-                html.Div([
-                    dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked),
+                        ],
+                        className='row-tabs-intro-final' ),
+                        
+                    html.Div(
+                        children=[
+                            dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot),
+                            dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked),
 
-                    dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot),
-                ], className="row"),
-                html.Div([
-                    dcc.Slider(id='year-slider3', min=1965, max=2019, value=1965, marks=slider_marks, step=1, tooltip={'always_visible': True, 'placement': 'top'}, updatemode='drag')
-                ], className="row-slider"),
-                html.Div([
-                    dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10),
-
-                ], className="row")
-            ], style={"width": "100%"})
-        ], selected_style={'background-color': "#5F9EA0", 'border': '1px solid black', 'font-weight': 'bold'},
-        style={'background-color': "#5F9EA0", "filter": "brightness(70%)"}),
+                        ],
+                        className='row', style={'background-color': '#3c4a63','padding': '10px'}
+                    )
+                ],
+                className='main_row'
+            )
+            
+        ],selected_style={'background-color': '#5F9EA0', 'border': '1px solid black','font-weight': 'bold' },
+        style={'background-color': '#5F9EA0','filter': 'brightness(70%)'}
+        ),
+        
             
         dcc.Tab(label='Comparison', value='tab-4', children=[
                 html.Div([
@@ -699,7 +802,7 @@ def render_content(tab, year):
         fig1 = fig_world_consu('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', year)
         fig2 = fig_consu_slider('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', year)
         fig3 = fig_top10_graph('oil_consumption', 'Oil', 'Oil Consumption (terawatt-hours)', year)
-        fig4 = create_choropleth_map('oil_consumption', 'Oil', year)
+        fig4 = create_choropleth_map('oil_consumption', 'Oil', year, False)
         return fig1, fig2, fig3, fig4
     else:
         return empty_fig, empty_fig, empty_fig, empty_fig
@@ -725,7 +828,7 @@ def render_content(tab, year2):
         fig1 = fig_world_consu('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
         fig2 = fig_consu_slider('coal_consumption', 'Oil', 'Coal Consumption (terawatt-hours)', year2)
         fig3 = fig_top10_graph('coal_consumption', 'Coal', 'Coal Consumption (terawatt-hours)', year2)
-        fig4 = create_choropleth_map('coal_consumption', 'Coal', year2)
+        fig4 = create_choropleth_map('coal_consumption', 'Coal', year2, False)
         return  fig1, fig2, fig3, fig4
     else:
         return empty_fig, empty_fig, empty_fig, empty_fig
@@ -737,6 +840,7 @@ def render_content(tab, year2):
     dash.dependencies.Output('fig_ren_consu_plot', 'figure'),
     dash.dependencies.Output('fig_ren_top_10', 'figure'),
     dash.dependencies.Output('fig_stacked_renew', 'figure'),
+    dash.dependencies.Output('fig_ren_choropleth', 'figure'),
 ],
 [
     dash.dependencies.Input('energy_tabs', 'value'),
@@ -756,9 +860,10 @@ def render_content(tab, year2, energy):
         fig1 = fig_world_consu('renewables_consumption', 'Renewables', 'Renewables Consumption (terawatt-hours)', year2)
         fig2 = stacked_renewables(year2, energy)
         fig3 = top_10_renewables(year2, energy)
-        return  fig1, fig2, fig3
+        fig4 = create_choropleth_map(energy, energy, year2, True)
+        return  fig1, fig2, fig3, fig4
     else:
-        return empty_fig, empty_fig, empty_fig
+        return empty_fig, empty_fig, empty_fig, empty_fig
 
 
 # Callback comparison tab
