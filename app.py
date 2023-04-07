@@ -2,10 +2,8 @@ import dash
 from dash import dcc
 from dash import html
 import plotly.graph_objs as go
-import plotly.express as px
 import pandas as pd
 import numpy as np
-import requests
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -16,8 +14,6 @@ data = pd.read_csv(
 continents = pd.read_csv(
     'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/country_continent_map.csv')
 
-# continent_geolocations = requests.get('https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/continents_geoLocation.json')
-# continent_geolocations=gpd.GeoDataFrame.from_features(continent_geolocations.json())
 
 
 # Preprocess the data
@@ -40,9 +36,6 @@ oil_consumption_region = oil_consumption_df.loc[oil_consumption_df['region'] != 
                                                                                                     'region', 'year']).sum()
 oil_consumption_region = oil_consumption_region.reset_index()[
     ['region', 'year', 'oil_consumption']]
-#merge geolocation for each continent
-# oil_consumption_region = pd.merge(oil_consumption_region, continent_geolocations, left_on='region', right_on='CONTINENT')
-# oil_consumption_region.drop(columns=['CONTINENT'], inplace=True)
 
 ########################################################################
 
@@ -98,9 +91,6 @@ def fig_consu_slider(variable, energy_type, yaxis_title, year):
     consumption_region_df = consumption_slider_df.loc[(consumption_slider_df['region'] != 'OWID_WRL') & (consumption_slider_df['year'] == year)].groupby([
                                                                                                         'region', 'year']).sum()
     consumption_region_df = consumption_region_df.reset_index()[['region', 'year', variable]]
-    #merge geolocation for each continent
-    # consumption_region_df = pd.merge(consumption_region_df, continent_geolocations, left_on='region', right_on='CONTINENT')
-    # consumption_region_df.drop(columns=['CONTINENT'], inplace=True)
 
     # Define the figure object
     fig_consump_slider = go.Figure()
