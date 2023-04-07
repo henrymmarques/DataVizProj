@@ -6,10 +6,8 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import requests
-import geopandas as gpd
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-import traceback
 
 # Load the data
 data = pd.read_csv(
@@ -18,8 +16,8 @@ data = pd.read_csv(
 continents = pd.read_csv(
     'https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/country_continent_map.csv')
 
-continent_geolocations = requests.get('https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/continents_geoLocation.json')
-continent_geolocations=gpd.GeoDataFrame.from_features(continent_geolocations.json())
+# continent_geolocations = requests.get('https://raw.githubusercontent.com/henrymmarques/DataVizProj/master/continents_geoLocation.json')
+# continent_geolocations=gpd.GeoDataFrame.from_features(continent_geolocations.json())
 
 
 # Preprocess the data
@@ -43,8 +41,8 @@ oil_consumption_region = oil_consumption_df.loc[oil_consumption_df['region'] != 
 oil_consumption_region = oil_consumption_region.reset_index()[
     ['region', 'year', 'oil_consumption']]
 #merge geolocation for each continent
-oil_consumption_region = pd.merge(oil_consumption_region, continent_geolocations, left_on='region', right_on='CONTINENT')
-oil_consumption_region.drop(columns=['CONTINENT'], inplace=True)
+# oil_consumption_region = pd.merge(oil_consumption_region, continent_geolocations, left_on='region', right_on='CONTINENT')
+# oil_consumption_region.drop(columns=['CONTINENT'], inplace=True)
 
 ########################################################################
 
@@ -101,8 +99,8 @@ def fig_consu_slider(variable, energy_type, yaxis_title, year):
                                                                                                         'region', 'year']).sum()
     consumption_region_df = consumption_region_df.reset_index()[['region', 'year', variable]]
     #merge geolocation for each continent
-    consumption_region_df = pd.merge(consumption_region_df, continent_geolocations, left_on='region', right_on='CONTINENT')
-    consumption_region_df.drop(columns=['CONTINENT'], inplace=True)
+    # consumption_region_df = pd.merge(consumption_region_df, continent_geolocations, left_on='region', right_on='CONTINENT')
+    # consumption_region_df.drop(columns=['CONTINENT'], inplace=True)
 
     # Define the figure object
     fig_consump_slider = go.Figure()
@@ -133,32 +131,7 @@ def fig_consu_slider(variable, energy_type, yaxis_title, year):
     fig_consump_slider.update_layout(layout)
 
     return fig_consump_slider
-"""
-######################### BY CONTINENT ##################################
-# def choropleth_by_continent():
-    # Convert the DataFrame to a GeoDataFrame
-gdf = gpd.GeoDataFrame(oil_consumption_region[oil_consumption_region['year'].isin([1970, 1980, 1990, 2000, 2010, 2019])], geometry='geometry')
 
-
-
-fig12 = px.choropleth_mapbox(
-    gdf,
-    geojson=gdf.geometry,
-    locations=gdf.index,
-    color="oil_consumption",
-    animation_frame='year',
-    height=600,
-    mapbox_style="carto-positron",
-    color_continuous_scale="solar",
-    opacity=0.5,
-    zoom=1
-).update_layout(margin={"l": 0, "r": 0, "b": 0, "t": 0},
-                coloraxis_colorbar=dict(title="Oil Consumption (terawatt hour)"))
-
-    # return fig
-
-##########################################################################
-"""
 
 
 def fig_top10_graph(variable, energy_type, xaxis_title, year):
