@@ -82,7 +82,6 @@ def fig_world_consu(variable, energy_type, yaxis_title, selected_year):
     fig_consum = go.Figure(data=trace_world, layout=layout_world)
 
     return fig_consum
-########################################################################
 
 def fig_consu_slider(variable, energy_type, yaxis_title, year):
 
@@ -485,8 +484,8 @@ def create_scatter(year):
 
     fig.update_layout(
         title='Renewables vs Non-Renewables Consumption in ' + str(year),
-        xaxis_title='Renewables Consumption',
-        yaxis_title='Non-Renewables Consumption',
+        xaxis_title='Renewables Consumption (TWh)',
+        yaxis_title='Non-Renewables Consumption (TWh)',
         hovermode='closest',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -569,7 +568,7 @@ app.layout = html.Div([
                             html.Br(),
                             html.Div(id="tabs-intro", className="tabs-intro", children=[
                                 'Explore the global ', html.Strong('consumption of oil '),
-                                'with our choropleth map and top 10 countries plot provide a comprehensive view of oil consumption around the world.',
+                                'with our choropleth map and top 10 countries plot providing a comprehensive view of oil consumption around the world.',
                                 html.P('Use the slider below the plots to see how consumption has changed over time from 1965 to 2019.'),    
                                 html.P('Gain insights into the most oil-hungry countries and their trends over time.')], 
                                      ),
@@ -631,7 +630,7 @@ app.layout = html.Div([
                             html.Br(),
                             html.Div( className="tabs-intro", children=[
                                 'Explore the global ', html.Strong('consumption of coal '),
-                                'with our choropleth map and top 10 countries plot provide a comprehensive view of coal consumption around the world.',
+                                'with our choropleth map and top 10 countries plot providing a comprehensive view of coal consumption around the world.',
                                 html.P('Use the slider below the plots to see how consumption has changed over time from 1965 to 2019.'),    
                                 html.P('Gain insights into the most coal-hungry countries and their trends over time.')], 
                                      ),
@@ -692,9 +691,9 @@ app.layout = html.Div([
                         children=[
                             html.Div( className="tabs-intro", children=[
                                 'Explore the global ', html.Strong('consumption of renewable energy '),
-                                'with our .......................',
-                                html.P('Use the slider ..... FALAR DA SELECAO DE ENERGIAS............1965 to 2019.'),    
-                                html.P('GSDFSDFSDFS.')], 
+                                'through our choropleth and the top 10 plot.',
+                                html.P('Using the energy selection available on the side, you can change the energies that appear in the graphs.'),    
+                                html.P('Keep in mind that the choropleth will show the first selected energy.')], 
                                      ),
                             html.Div([
     
@@ -733,7 +732,7 @@ app.layout = html.Div([
                         children=[
                             dcc.Graph(id='fig_ren_choropleth', figure=fig_ren_choropleth),
                             # html.Div('ola'),
-                            dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10),
+                            dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked),
                         ],
                         className='row', style={'background-color': '#3c4a63', 'padding': '10px'}
                     ),
@@ -756,7 +755,7 @@ app.layout = html.Div([
                         children=[
                             html.Br(),
                             html.Div( className="tabs-intro", children=[
-                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of coal.'], 
+                                'Moving from a country-level analysis to a global perspective, we present our next set of plots that showcase the worldwide consumption of renewables.'], 
                                      ),
 
                         ],
@@ -765,7 +764,7 @@ app.layout = html.Div([
                     html.Div(
                         children=[
                             dcc.Graph(id='fig_ren_consu_plot', figure=fig_ren_consu_plot),
-                            dcc.Graph(id='fig_stacked_renew', figure=fig_ren_stacked),
+                            dcc.Graph(id='fig_ren_top_10', figure=fig_ren_top_10),
 
                         ],
                         className='row', style={'background-color': '#3c4a63','padding': '10px'}
@@ -785,10 +784,9 @@ app.layout = html.Div([
                         children=[
                             html.Br(),
                             html.Div( className="tabs-intro", children=[
-                                'Explore the global ', html.Strong('consumption of coal '),
-                                'with sdfsdfsdfsdf......................',
-                                html.P('Use the slider below the plots to ................ 1985 to 2019.'),    
-                                html.P('Gain insights into TRTRTTTTTTTTTTTTTTT.')], 
+                                'Explore the comparison in renewable and non-renewable energy consumption (including nuclear power and gas) through the graph on the right.',
+                                html.P('Using the country selector alongside, change the data in each graph.'),    
+                                html.P('The last graph - scatter plot - shows the various countries and their consumption of the two types of energy.')], 
                                      ),
                            html.Div([
                     dcc.Dropdown(
@@ -802,7 +800,7 @@ app.layout = html.Div([
                         className='row-tabs-intro' ),
                     html.Div([
                     html.Div([
-                        html.Div('EXPLAIN THE GAUGE CHARTS...........', style={'color': 'white'}),
+                        html.Div('Indicators of the percentage of electricity for each energy category:', style={'color': 'white'}),
                         html.Div([
                             dcc.Graph(id='fig_gauge_ren',
                                       figure=fig_gauge_ren),
